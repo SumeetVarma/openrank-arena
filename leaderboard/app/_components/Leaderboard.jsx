@@ -51,6 +51,11 @@ export default function Leaderboard({ rows, scenarios }) {
   return (
     <div className="lbWrap">
       <table className="lbTable">
+        <colgroup>
+          <col className="lbColPlayer" />
+          <col className="lbColOverall" />
+          {scenarios.map((s) => <col key={s.id} className="lbColScenario" />)}
+        </colgroup>
         <thead>
           <tr>
             <th

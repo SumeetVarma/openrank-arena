@@ -132,7 +132,6 @@ export default function SubmitPage() {
   --dir ./my-page \\
   --note "tightened headings"`}</pre>
               <p className="cliHint">
-                Set <code>ARENA_BASE_URL=https://openrank-arena.vercel.app</code> in your env.
                 Or just tell <span className="em">Claude / Codex</span> &ldquo;submit my page&rdquo;.
               </p>
             </div>

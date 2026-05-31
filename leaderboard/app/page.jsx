@@ -186,7 +186,7 @@ export default async function Page() {
             An AEO benchmark for friends. Three underdog pages, three scenarios. Edit them, upload, a judge picks the better version.
           </p>
           <div className="heroActions">
-            <a className="btn" href="/submit">Submit your page</a>
+            <a className="btn" href="#submit">Submit your page</a>
             <a className="tlink" href="#leaderboard">See the board</a>
           </div>
         </section>
@@ -234,6 +234,45 @@ export default async function Page() {
                 </div>
               </a>
             ))}
+          </div>
+        </section>
+
+        {/* ──── Submit (CLI-first) ──── */}
+        <section className="section" id="submit">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">Submit</p>
+              <h2>Tell your agent to ship it</h2>
+            </div>
+            <span className="sectionMeta">
+              first upload registers you · iterate freely
+            </span>
+          </div>
+
+          <div className="submitTwoUp">
+            <div className="cliPanel" style={{ alignSelf: "start" }}>
+              <p className="cliPanelTitle">From your terminal · or via Claude / Codex</p>
+              <pre>{`node harness/submit.mjs \\
+  --name alice \\
+  --scenario carryon \\
+  --dir ./my-page \\
+  --note "tightened headings"`}</pre>
+              <p className="cliHint">
+                Defaults to <code>https://openrank-arena.vercel.app</code>.
+                Just say &ldquo;<span className="em">submit my page to openrank-arena</span>&rdquo; — your agent
+                takes it from there.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--ink-mute)" }}>
+                Prefer the browser?
+              </p>
+              <a className="btn btn--ghost" href="/submit">Upload a zip</a>
+              <p style={{ fontSize: 13, color: "var(--ink-mute)", lineHeight: 1.5 }}>
+                Drag your zip, tag a scenario, done. Slower than the CLI but no setup.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -310,16 +349,22 @@ export default async function Page() {
           )}
         </section>
 
-        {/* ──── Judge prompt verbatim ──── */}
+        {/* ──── Judge prompt verbatim (collapsed by default) ──── */}
         <section className="section">
           <div className="sectionHead">
             <div>
               <p className="eyebrow">Judge</p>
               <h2>The prompt</h2>
             </div>
-            <span className="sectionMeta">harness/match.mjs</span>
+            <span className="sectionMeta">
+              <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/harness/match.mjs">harness/match.mjs</a>
+            </span>
           </div>
-          <pre className="promptBlock">{`You're helping a friend make a real buying decision. They asked:
+          <details>
+            <summary style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--ink-mute)", padding: "12px 0", borderTop: "1px solid var(--rule)", borderBottom: "1px solid var(--rule)" }}>
+              Show the full prompt
+            </summary>
+          <pre className="promptBlock" style={{ marginTop: 16 }}>{`You're helping a friend make a real buying decision. They asked:
 
 `}<span className="blockquote">{`"I need a carry-on travel backpack under $200 for a 10-day trip.
 Comfortable, organized, durable. What do you recommend?"`}</span>{`
@@ -355,6 +400,7 @@ integrations, prices → automatic rank drop. Ties OK.`}</span>{`
     { "signal": "truthfulness",       "best": "<letter>", "worst": "<letter>" }
   ]
 }`}</span></pre>
+          </details>
         </section>
 
         {/* ──── Notes ──── */}

@@ -1743,6 +1743,17 @@ code, kbd, .mono {
   white-space: nowrap;
 }
 
+/* Submit section on home — CLI-first two-up */
+.submitTwoUp {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: var(--s-5);
+  align-items: stretch;
+}
+@media (max-width: 880px) {
+  .submitTwoUp { grid-template-columns: 1fr; }
+}
+
 /* Sortable leaderboard table */
 .lbWrap {
   background: var(--paper-light);
@@ -1758,9 +1769,13 @@ code, kbd, .mono {
   width: 100%;
   border-collapse: collapse;
   font-size: 16px;
+  table-layout: fixed;
 }
+.lbTable col.lbColPlayer { width: 36%; }
+.lbTable col.lbColOverall { width: 18%; }
+.lbTable col.lbColScenario { width: auto; }
 .lbHead {
-  padding: 12px 8px;
+  padding: 14px 10px;
   text-align: left;
   font-family: var(--font-mono);
   font-size: 11px;
