@@ -1,7 +1,9 @@
+// Player submission upload. Accepts multipart/form-data with a zip file.
+// No password on player name — anyone can submit under any name (5-friend
+// trust). Per-submission privacy is opt-in via isPasswordProtected.
+
 import {
-  createPlayer,
-  getPlayer,
-  verifyPlayer,
+  ensurePlayer,
   appendSubmissionVersion,
   uploadZip
 } from "../../../lib/storage.mjs";
@@ -11,9 +13,14 @@ import crypto from "node:crypto";
 export const runtime = "nodejs";
 
 export async function POST(request) {
-  const form = await request.formData();
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return json({ ok: false, error: "Invalid form body" }, 400);
+  }
+
   const name = String(form.get("name") || "").trim();
-  const password = String(form.get("password") || "");
   const scenario = String(form.get("scenario") || "");
   const zip = form.get("zip");
   const isPasswordProtected = form.get("isPasswordProtected") === "on";
@@ -30,14 +37,7 @@ export async function POST(request) {
     return json({ ok: false, error: "Zip file required" }, 400);
   }
 
-  // Claim or verify player name
-  const existing = await getPlayer(name);
-  if (existing) {
-    const ok = await verifyPlayer(name, password);
-    if (!ok) return json({ ok: false, error: "Player name taken or wrong password" }, 401);
-  } else {
-    await createPlayer({ name, password });
-  }
+  await ensurePlayer({ name });
 
   const buffer = Buffer.from(await zip.arrayBuffer());
   const version = crypto.randomBytes(4).toString("hex");
@@ -53,6 +53,12 @@ export async function POST(request) {
   });
 
   const liveUrl = `/players/${name}/${scenario}`;
+
+  const accept = request.headers.get("accept") || "";
+  if (accept.includes("text/html") && !accept.includes("application/json")) {
+    return Response.redirect(new URL(liveUrl, request.url), 303);
+  }
+
   return json({ ok: true, version: record.version, liveUrl });
 }
 

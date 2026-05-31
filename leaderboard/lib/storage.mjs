@@ -1,62 +1,70 @@
-// Thin wrappers over Vercel KV + Blob. Falls back to in-memory if env not set
-// (so local dev works without provisioning the services).
+// Thin wrappers over Upstash Redis (Marketplace) + Vercel Blob. Falls back to
+// in-memory if env not set (so local dev works without provisioning services).
 //
 // Versioning: every submission creates a new version. The latest version is
-// served at /players/<name>/<scenario>; old versions live at /players/<name>/<scenario>/v/<version>.
+// served at /players/<name>/<scenario>; old versions live at
+// /players/<name>/<scenario>/v/<version>.
 
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 import { put, head } from "@vercel/blob";
 import crypto from "node:crypto";
 
-const HAS_KV = Boolean(process.env.KV_REST_API_URL || process.env.KV_URL);
+const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 const HAS_BLOB = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+const redis = HAS_KV
+  ? new Redis({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN
+    })
+  : null;
 
 const memory = {
   players: new Map(),
-  submissionVersions: new Map(), // key: `${name}:${scenario}` -> array of versions
+  submissionVersions: new Map(), // key: `${name}:${scenario}` -> array of versions (newest first)
   scores: new Map(),
   scoresIndex: new Map()
 };
 
 // -------- Player --------
+//
+// Players are claimed on first write — no password. Any future submission
+// under the same name overwrites the same player record. Anyone can use any
+// name (5-friend trust model). Per-submission privacy is handled separately.
 
-export async function createPlayer({ name, password }) {
+export async function ensurePlayer({ name }) {
   const key = String(name || "").trim().toLowerCase();
   if (!key) throw new Error("Player name required");
-  const passwordHash = password ? hash(password) : null;
-  const record = { name: String(name).trim(), passwordHash, joinedAt: new Date().toISOString() };
+  const display = String(name).trim();
   if (HAS_KV) {
-    const existing = await kv.get(`player:${key}`);
+    const existing = await redis.get(`player:${key}`);
     if (existing) return existing;
-    await kv.set(`player:${key}`, record);
-    await kv.sadd("players:all", key);
+    const record = { name: display, joinedAt: new Date().toISOString() };
+    await redis.set(`player:${key}`, record);
+    await redis.sadd("players:all", key);
+    return record;
   } else {
     if (memory.players.has(key)) return memory.players.get(key);
+    const record = { name: display, joinedAt: new Date().toISOString() };
     memory.players.set(key, record);
+    return record;
   }
-  return record;
 }
 
 export async function getPlayer(name) {
   const key = String(name || "").trim().toLowerCase();
-  if (HAS_KV) return (await kv.get(`player:${key}`)) || null;
+  if (HAS_KV) return (await redis.get(`player:${key}`)) || null;
   return memory.players.get(key) || null;
 }
 
 export async function listPlayers() {
   if (HAS_KV) {
-    const keys = (await kv.smembers("players:all")) || [];
-    const records = await Promise.all(keys.map((k) => kv.get(`player:${k}`)));
+    const keys = (await redis.smembers("players:all")) || [];
+    if (!keys.length) return [];
+    const records = await Promise.all(keys.map((k) => redis.get(`player:${k}`)));
     return records.filter(Boolean);
   }
   return [...memory.players.values()];
-}
-
-export async function verifyPlayer(name, password) {
-  const player = await getPlayer(name);
-  if (!player) return false;
-  if (!player.passwordHash) return true; // open name (no password set)
-  return player.passwordHash === hash(password || "");
 }
 
 // -------- Submission Versions --------
@@ -94,10 +102,10 @@ export async function appendSubmissionVersion({
   };
 
   if (HAS_KV) {
-    await kv.set(versionKey(name, scenario, version), record);
-    await kv.lpush(listKey(name, scenario), version);
-    await kv.set(latestKey(name, scenario), version);
-    await kv.sadd(`scenario:${scenario}:submissions`, String(name).toLowerCase());
+    await redis.set(versionKey(name, scenario, version), record);
+    await redis.lpush(listKey(name, scenario), version);
+    await redis.set(latestKey(name, scenario), version);
+    await redis.sadd(`scenario:${scenario}:submissions`, String(name).toLowerCase());
   } else {
     const k = `${String(name).toLowerCase()}:${scenario}`;
     const list = memory.submissionVersions.get(k) || [];
@@ -109,24 +117,25 @@ export async function appendSubmissionVersion({
 
 export async function getLatestSubmission(name, scenario) {
   if (HAS_KV) {
-    const version = await kv.get(latestKey(name, scenario));
+    const version = await redis.get(latestKey(name, scenario));
     if (!version) return null;
-    return await kv.get(versionKey(name, scenario, version));
+    return await redis.get(versionKey(name, scenario, version));
   }
   const list = memory.submissionVersions.get(`${String(name).toLowerCase()}:${scenario}`) || [];
   return list[0] || null;
 }
 
 export async function getSubmissionVersion(name, scenario, version) {
-  if (HAS_KV) return (await kv.get(versionKey(name, scenario, version))) || null;
+  if (HAS_KV) return (await redis.get(versionKey(name, scenario, version))) || null;
   const list = memory.submissionVersions.get(`${String(name).toLowerCase()}:${scenario}`) || [];
   return list.find((s) => s.version === version) || null;
 }
 
 export async function listSubmissionVersions(name, scenario) {
   if (HAS_KV) {
-    const versions = (await kv.lrange(listKey(name, scenario), 0, 99)) || [];
-    const records = await Promise.all(versions.map((v) => kv.get(versionKey(name, scenario, v))));
+    const versions = (await redis.lrange(listKey(name, scenario), 0, 99)) || [];
+    if (!versions.length) return [];
+    const records = await Promise.all(versions.map((v) => redis.get(versionKey(name, scenario, v))));
     return records.filter(Boolean);
   }
   return memory.submissionVersions.get(`${String(name).toLowerCase()}:${scenario}`) || [];
@@ -134,7 +143,8 @@ export async function listSubmissionVersions(name, scenario) {
 
 export async function listLatestSubmissionsForScenario(scenario) {
   if (HAS_KV) {
-    const names = (await kv.smembers(`scenario:${scenario}:submissions`)) || [];
+    const names = (await redis.smembers(`scenario:${scenario}:submissions`)) || [];
+    if (!names.length) return [];
     const records = await Promise.all(names.map((n) => getLatestSubmission(n, scenario)));
     return records.filter(Boolean);
   }
@@ -189,9 +199,9 @@ export async function fetchZip(blobPath) {
 export async function saveScore({ scenario, runId, payload }) {
   const key = `score:${scenario}:${runId}`;
   if (HAS_KV) {
-    await kv.set(key, payload);
-    await kv.lpush(`scores:${scenario}`, runId);
-    await kv.ltrim(`scores:${scenario}`, 0, 99);
+    await redis.set(key, payload);
+    await redis.lpush(`scores:${scenario}`, runId);
+    await redis.ltrim(`scores:${scenario}`, 0, 99);
   } else {
     memory.scores.set(key, payload);
     const list = memory.scoresIndex.get(scenario) || [];
@@ -202,8 +212,9 @@ export async function saveScore({ scenario, runId, payload }) {
 
 export async function getRecentScores(scenario, limit = 20) {
   if (HAS_KV) {
-    const ids = (await kv.lrange(`scores:${scenario}`, 0, limit - 1)) || [];
-    const records = await Promise.all(ids.map((id) => kv.get(`score:${scenario}:${id}`)));
+    const ids = (await redis.lrange(`scores:${scenario}`, 0, limit - 1)) || [];
+    if (!ids.length) return [];
+    const records = await Promise.all(ids.map((id) => redis.get(`score:${scenario}:${id}`)));
     return records.filter(Boolean);
   }
   const ids = (memory.scoresIndex.get(scenario) || []).slice(0, limit);

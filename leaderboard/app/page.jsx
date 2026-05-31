@@ -79,10 +79,6 @@ export default async function Page() {
             <input name="name" required placeholder="alice, bob, sumeet..." pattern="^[a-zA-Z0-9_-]+$" />
           </label>
           <label>
-            Optional password (locks your name)
-            <input name="password" type="password" placeholder="leave blank to keep name open" />
-          </label>
-          <label>
             Scenario to start with
             <select name="scenario" required defaultValue="carryon">
               {scenarioList.map((s) => (

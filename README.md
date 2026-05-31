@@ -71,12 +71,33 @@ openrank-arena/
 
 ## How a player submits
 
-1. Visit the deployed app's `/submit` page.
-2. Type a player name (becomes your URL slug — e.g. `/players/alice/...`). Optionally set a player password.
-3. Pick a scenario.
-4. Upload a zip. Minimum contents: `index.html`. Optional: `llms.txt`, `robots.txt`, `assets/`, `meta.json`.
-5. (Optional) Mark the submission as password-protected.
-6. Submit. Your page is live at `/players/<name>/<scenario>`. Every upload is a new version.
+Two ways, both work the same backend.
+
+### Option A — From the website
+1. Visit https://openrank-arena.vercel.app/
+2. "Claim a name" → seeds a v1 from the baseline
+3. Iterate locally → upload a new zip via `/submit`
+
+### Option B — From the CLI (LLM-friendly)
+Designed so you can tell Claude / Codex / Cursor "submit my page" and it just runs:
+
+```bash
+# 1. Claim a name (creates a v1 seeded from the baseline)
+node harness/start.mjs --name alice --scenario carryon
+
+# 2. Iterate on a local folder with at least index.html
+mkdir alice-carryon && cd alice-carryon
+curl -O https://openrank-arena.vercel.app/baseline/carryon/starter.zip
+unzip starter.zip
+# ...edit index.html, llms.txt, add assets/...
+
+# 3. Submit (creates a new version, becomes live immediately)
+node harness/submit.mjs --name alice --scenario carryon --dir ./alice-carryon \
+  --note "tightened headings, added FAQ"
+```
+
+Every submission becomes a new version. The latest is what shows on the leaderboard;
+old versions stay browseable at `/players/<name>/<scenario>/v/<version>`.
 
 See [`submission-template/`](./submission-template/) for an example zip layout.
 

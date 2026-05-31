@@ -1,11 +1,9 @@
 // One-click: claim a player name and create a v1 submission seeded with the baseline.
-// Goal: zero-friction first submission. Player picks name + scenario, clicks button,
-// has a live page they can immediately iterate on.
+// Goal: zero-friction first submission. No passwords on player name — anyone can
+// use any name (5-friend trust). Per-submission privacy is handled separately.
 
 import {
-  createPlayer,
-  getPlayer,
-  verifyPlayer,
+  ensurePlayer,
   appendSubmissionVersion,
   uploadZip
 } from "../../../lib/storage.mjs";
@@ -16,9 +14,14 @@ import crypto from "node:crypto";
 export const runtime = "nodejs";
 
 export async function POST(request) {
-  const form = await request.formData();
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return json({ ok: false, error: "Invalid form body" }, 400);
+  }
+
   const name = String(form.get("name") || "").trim();
-  const password = String(form.get("password") || "");
   const scenario = String(form.get("scenario") || "");
 
   if (!name || !/^[a-zA-Z0-9_-]+$/.test(name)) {
@@ -27,14 +30,7 @@ export async function POST(request) {
   const s = getScenario(scenario);
   if (!s) return json({ ok: false, error: "Unknown scenario" }, 400);
 
-  // Claim or verify
-  const existing = await getPlayer(name);
-  if (existing) {
-    const ok = await verifyPlayer(name, password);
-    if (!ok) return json({ ok: false, error: "Player name taken or wrong password" }, 401);
-  } else {
-    await createPlayer({ name, password });
-  }
+  await ensurePlayer({ name });
 
   const buffer = await buildStarterZip(s);
   const version = crypto.randomBytes(4).toString("hex");
@@ -49,10 +45,19 @@ export async function POST(request) {
     note: "auto-seeded from baseline"
   });
 
+  const liveUrl = `/players/${name}/${scenario}`;
+
+  // If the request came from a browser form (text/html accept header), redirect
+  // to the live page so the user sees their submission immediately.
+  const accept = request.headers.get("accept") || "";
+  if (accept.includes("text/html")) {
+    return Response.redirect(new URL(liveUrl, request.url), 303);
+  }
+
   return json({
     ok: true,
     version: record.version,
-    liveUrl: `/players/${name}/${scenario}`,
+    liveUrl,
     starterDownloadUrl: `/baseline/${scenario}/starter.zip`
   });
 }

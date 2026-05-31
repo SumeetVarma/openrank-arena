@@ -76,10 +76,6 @@ export default function SubmitPage() {
             <input name="name" required placeholder="e.g. sumeet, alice, bob" pattern="^[a-zA-Z0-9_-]+$" />
           </label>
           <label>
-            Player password (optional — protects your name from being claimed by someone else)
-            <input name="password" type="password" placeholder="leave blank to keep name open" />
-          </label>
-          <label>
             Scenario
             <select name="scenario" required>
               {scenarioList.map((s) => (
