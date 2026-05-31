@@ -33,6 +33,7 @@ export function RenderedTopBar({ scenario, kind, name, version, extra }) {
 // The cloned source pages carry JSON-LD with the original site's URLs in
 // fields like @id, url, image, sameAs, contentUrl, logo — those signals must
 // not point at the original brand or the page leaks provenance.
+// Domain-level leaks
 const LEAK_DOMAIN_REGEX = new RegExp(
   [
     "https?:\\/\\/(?:www\\.)?topodesigns\\.com",
@@ -51,11 +52,39 @@ const LEAK_DOMAIN_REGEX = new RegExp(
   "gi"
 );
 
+// Third-party URLs whose path mentions the original brand
+// (e.g. https://sourceforge.net/s/rankscale-ai/icon, twitter handles, etc).
+const LEAK_PATH_REGEX = new RegExp(
+  "https?:\\/\\/[^\"' >]*?(?:rankscale|topo-designs|tortuga|nomatic|magnolia|blunn|brightedge|usehall|tryprofound)[^\"' >]*",
+  "gi"
+);
+
+// Brand-name text leaks (used to scrub names that may appear inside JSON-LD
+// fields like aggregateRating.name, organization.name, etc).
+const BRAND_NAME_REGEX = new RegExp(
+  [
+    "Topo Designs", "Topo",
+    "Tortuga",
+    "Nomatic", "NOMATIC",
+    "Rankscale", "rankscale",
+    "Profound",
+    "Hall AI", "UseHall",
+    "BrightEdge",
+    "Magnolia Family Dentistry", "Magnolia Dentistry",
+    "Blunn Creek",
+    "Northwest Austin Family Dentistry",
+    "Broberg Family Dental",
+    "MM Family Dentistry"
+  ].join("|"),
+  "g"
+);
+
 function scrubJsonLdBlock(raw) {
   if (!raw) return raw;
-  // Strip URLs that point to known original-brand domains. Replace with a
-  // neutral arena URL placeholder so downstream parsers still get a valid URL.
-  return raw.replace(LEAK_DOMAIN_REGEX, "https://openrank-arena.vercel.app");
+  return raw
+    .replace(LEAK_DOMAIN_REGEX, "https://openrank-arena.vercel.app")
+    .replace(LEAK_PATH_REGEX, "https://openrank-arena.vercel.app")
+    .replace(BRAND_NAME_REGEX, "");
 }
 
 export function RenderedJsonLd({ blocks }) {
