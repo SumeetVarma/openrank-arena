@@ -82,16 +82,13 @@ Two ways, both work the same backend.
 Designed so you can tell Claude / Codex / Cursor "submit my page" and it just runs:
 
 ```bash
-# 1. Claim a name (creates a v1 seeded from the baseline)
-node harness/start.mjs --name alice --scenario carryon
-
-# 2. Iterate on a local folder with at least index.html
+# 1. Grab the starter (baseline as a zip to iterate from)
 mkdir alice-carryon && cd alice-carryon
 curl -O https://openrank-arena.vercel.app/baseline/carryon/starter.zip
 unzip starter.zip
 # ...edit index.html, llms.txt, add assets/...
 
-# 3. Submit (creates a new version, becomes live immediately)
+# 2. Submit (creates the player on first upload, becomes live immediately)
 node harness/submit.mjs --name alice --scenario carryon --dir ./alice-carryon \
   --note "tightened headings, added FAQ"
 ```

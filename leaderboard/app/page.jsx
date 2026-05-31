@@ -117,7 +117,6 @@ export default async function Page() {
         <nav className="mastheadMeta" aria-label="primary">
           <a href="#leaderboard">leaderboard</a>
           <a href="#scenarios">scenarios</a>
-          <a href="#start">join</a>
           <a href="/submit">submit</a>
           <label className="searchPill">
             <span aria-hidden>⌕</span>
@@ -157,7 +156,7 @@ export default async function Page() {
               a judge decides. Nobody knows it&apos;s a game. Retire gaps and harden underdogs.
             </p>
             <div className="heroActions">
-              <a className="btn" href="#start">Claim a name</a>
+              <a className="btn" href="/submit">Submit your page</a>
               <a className="tlink" href="#scenarios">Explore scenarios</a>
             </div>
           </div>
@@ -336,46 +335,6 @@ export default async function Page() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* ──── Start ──── */}
-        <section className="section scrollAnchor" id="start">
-          <div className="sectionHead">
-            <div>
-              <p className="eyebrow">Zero-friction start</p>
-              <h2>Claim a name. Iterate.</h2>
-            </div>
-            <span className="sectionMeta">30 seconds · no signup</span>
-          </div>
-
-          <form className="formCard" action="/api/start" method="post">
-            <div className="formField">
-              <label className="formLabel" htmlFor="start-name">Player name</label>
-              <input
-                id="start-name"
-                name="name"
-                required
-                placeholder="alice, bob, sumeet…"
-                pattern="^[a-zA-Z0-9_-]+$"
-              />
-              <span className="hint">Becomes your URL: /players/&lt;name&gt;</span>
-            </div>
-            <div className="formField">
-              <label className="formLabel" htmlFor="start-scenario">Starting scenario</label>
-              <select id="start-scenario" name="scenario" required defaultValue="carryon">
-                {scenarioList.map((s) => (
-                  <option key={s.id} value={s.id}>{s.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <button className="btn" type="submit">Claim and seed v1</button>
-            </div>
-            <p className="hint">
-              We copy the baseline as your v1 so you have something to iterate on instantly.
-              Upload improved zips at <a className="tlink" href="/submit">/submit</a> any time.
-            </p>
-          </form>
         </section>
 
         {/* ──── Players ──── */}

@@ -3,9 +3,7 @@
 // Prefers the visually-cloned baseline (with real images + structured HTML),
 // falls back to markdown rendering for any scenario without a clone.
 //
-// Used by:
-//   1. /baseline/[scenario]/starter.zip — downloadable starter for offline editing
-//   2. /api/start — one-click "clone baseline as my v1" to create an instant submission
+// Used by /baseline/[scenario]/starter.zip — downloadable starter for offline editing.
 
 import JSZip from "jszip";
 import { readFile, readdir } from "node:fs/promises";

@@ -26,7 +26,7 @@ export const scenarios = {
   },
   "aeo-tool": {
     id: "aeo-tool",
-    label: "AI Search Visibility Platform",
+    label: "OpenRank",
     buyerQuery:
       "I run marketing at a 40-person startup. I need a tool to track how my brand shows up in ChatGPT, Perplexity, and Gemini. What should I use?",
     underdog: { slug: "openrank", name: "OpenRank" },
