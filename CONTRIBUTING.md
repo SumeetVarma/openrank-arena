@@ -84,22 +84,24 @@ everyone in the friend group sees those.
 
 ## Vercel + the hobby plan
 
-This project runs on Vercel's free Hobby tier.
+This project runs on Vercel's free Hobby tier. Vercel **does not** restrict
+the number of GitHub contributors to a Hobby project — there's no contributor
+cap and no "this project has too many committers, upgrade" mechanism. Public
+repos owned by a personal account with multiple PR contributors are fine.
 
-- **Hobby teams are single-owner** — contributors can't be added even if we
-  wanted to, so there's no seat-fee risk from accepting PRs.
-- **Preview deploys for fork PRs require the maintainer to click an
-  "authorize deployment" link** Vercel posts on the PR. This is a security
-  measure to prevent fork PRs from accessing project secrets. Once
-  authorized, the preview URL appears as a comment on the PR — that's what
-  the maintainer reviews before merging.
-- Branch PRs opened from inside this repo (rare for an open-source project)
-  do deploy automatically.
-- If you want a persistent preview environment of your own changes, fork
-  the repo and connect your fork to your own Vercel account.
+What Vercel *does* enforce on Hobby:
 
-Hobby-tier limits worth knowing about (so PRs don't accidentally blow them):
-4 Active CPU hours / 1M function invocations / 360 GB-hr memory per month.
-This project is non-commercial; if that changes the maintainer upgrades to
-Pro, not the contributors.
+- **Fork-PR previews require maintainer authorization.** Vercel posts an
+  "authorize deployment" link as a comment on each fork PR; the maintainer
+  clicks it once to deploy that PR's preview. Security measure (so fork PRs
+  can't silently leak secrets). Once authorized, the preview URL appears on
+  the PR for review.
+- **No GitHub org-owned repos** on Hobby. Keep the repo on the maintainer's
+  personal account.
+- **No commercial use** — no ads, paid sponsorships, donations, or paid
+  devs writing the code. If that changes, the maintainer upgrades to Pro;
+  contributors don't have to.
+
+If you want a persistent preview environment of your own work, fork the
+repo and connect your fork to your own Vercel account.
 
