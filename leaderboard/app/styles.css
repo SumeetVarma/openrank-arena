@@ -2523,6 +2523,16 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   color: var(--ink-mute);
   transition: transform 160ms ease, color 160ms ease;
 }
+.activityId {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ink-mute);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
 @media (max-width: 720px) {
   .activityRowLink {
     grid-template-columns: 1fr auto;
@@ -2708,3 +2718,243 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   margin: var(--s-7) 0;
 }
 .scrollAnchor { scroll-margin-top: 80px; }
+
+/* ──────────────────────────────────────────────────────────────
+   LIVELINESS LAYER — motion, color tints, live signals, personality
+   ────────────────────────────────────────────────────────────── */
+
+/* Soft warm wash behind the hero, drifting slowly. Gives the page atmosphere
+   without competing with the type. Uses two radial gradients tinted with the
+   ember + plum accents, very low opacity, tied to the .heroSplit section. */
+.heroSplit {
+  position: relative;
+  isolation: isolate;
+}
+.heroSplit::before {
+  content: "";
+  position: absolute;
+  inset: -10% -8% -8% -8%;
+  z-index: -1;
+  background:
+    radial-gradient(60% 50% at 78% 18%, rgba(197, 69, 12, 0.10), transparent 70%),
+    radial-gradient(50% 45% at 10% 80%, rgba(90, 58, 82, 0.08), transparent 70%);
+  filter: blur(2px);
+  animation: heroDrift 24s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes heroDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-2%, 1.5%, 0) scale(1.05); }
+}
+
+/* Hero stagger-in (extends existing .rise) */
+.heroSplitLeft > * { animation: rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.heroSplitLeft > *:nth-child(1) { animation-delay: 0ms; }
+.heroSplitLeft > *:nth-child(2) { animation-delay: 80ms; }
+.heroSplitLeft > *:nth-child(3) { animation-delay: 160ms; }
+.heroSplitLeft > *:nth-child(4) { animation-delay: 220ms; }
+.heroSplitLeft > *:nth-child(5) { animation-delay: 280ms; }
+.heroSplitLeft > *:nth-child(6) { animation-delay: 340ms; }
+.heroSplitRight { animation: rise 900ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both; }
+
+/* Prompt quote: fade-swap when the active tab changes. We re-trigger the
+   animation on every render by keying off the quote text via animation-name. */
+.promptDemoQuote {
+  animation: quoteFade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes quoteFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Live pulse in the masthead */
+.livePulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 4px 10px 4px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-light);
+}
+.livePulseDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #21a35a;
+  box-shadow: 0 0 0 0 rgba(33, 163, 90, 0.55);
+  animation: livePulseRing 2.2s ease-out infinite;
+}
+@keyframes livePulseRing {
+  0%   { box-shadow: 0 0 0 0 rgba(33, 163, 90, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(33, 163, 90, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(33, 163, 90, 0); }
+}
+.livePulseLabel { color: var(--ink-soft); }
+@media (max-width: 720px) {
+  .livePulse .livePulseLabel { display: none; }
+}
+
+/* Scenario card tinting — each card gets its own accent stripe + accent color
+   on hover, so they read as three distinct arenas rather than three uniform
+   cards. The stripe is a 4px top border that animates in on hover. */
+.featureCard {
+  position: relative;
+}
+.featureCard::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--card-accent, var(--ember));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.featureCard:hover::after { transform: scaleX(1); }
+.featureCard.scenario--carryon  { --card-accent: var(--ember); }
+.featureCard.scenario--dental   { --card-accent: var(--sage); }
+.featureCard.scenario--aeo-tool { --card-accent: var(--plum); }
+
+.featureCard.scenario--carryon .featureCategory  { color: var(--ember); }
+.featureCard.scenario--dental .featureCategory   { color: var(--sage); }
+.featureCard.scenario--aeo-tool .featureCategory { color: var(--plum); }
+
+/* Tighten the per-card hover lift on the new tinted cards */
+.featureCard:hover { transform: translateY(-4px); }
+
+/* OpenRank easter egg — a tiny "Meta :p" chip pinned to the aeo-tool card */
+.featureCard.scenario--aeo-tool .featureBody::after {
+  content: "Life is incomplete without Meta :p";
+  display: inline-block;
+  margin-top: 6px;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--plum);
+  background: rgba(90, 58, 82, 0.08);
+  border: 1px dashed rgba(90, 58, 82, 0.3);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+/* Recent submissions: highlight the freshest row with a soft ember tint and a
+   subtle pulsing dot, so the page visibly says "this just happened". */
+.activityFeed .activityItem--link:first-child .activityRowLink {
+  background:
+    linear-gradient(90deg, rgba(197, 69, 12, 0.07) 0%, transparent 70%);
+  position: relative;
+}
+.activityFeed .activityItem--link:first-child .activityRowLink::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 3px;
+  background: var(--ember);
+  animation: liveBar 2.2s ease-out infinite;
+}
+@keyframes liveBar {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.activityFeed .activityItem--link:first-child .activityWho::before {
+  content: "JUST IN";
+  display: inline-block;
+  margin-right: 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ember);
+  background: rgba(197, 69, 12, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  vertical-align: 1px;
+}
+
+/* Hero stat hover: when you hover a stat tile, the number nudges and the
+   label brightens — tiny tactile signal that the data is real. */
+.heroStats > div {
+  transition: transform 220ms ease;
+  cursor: default;
+}
+.heroStats > div:hover { transform: translateY(-2px); }
+.heroStats > div:hover dd { color: var(--ember); }
+
+/* Prompt tabs: hover bloom */
+.promptTab:not(.is-active):hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Leaderboard rows: per-row hover lift with a left ember rail that draws in */
+.lbTable tbody tr.lbRow {
+  position: relative;
+  transition: background 160ms ease;
+}
+.lbTable tbody tr.lbRow td:first-child {
+  position: relative;
+}
+.lbTable tbody tr.lbRow:hover {
+  background: rgba(197, 69, 12, 0.035);
+}
+.lbTable tbody tr.lbRow:hover td:first-child::before {
+  transform: scaleY(1);
+}
+.lbTable tbody tr.lbRow td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 8%;
+  width: 2px;
+  height: 84%;
+  background: var(--ember);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lbTable tbody tr.lbRow.is-baseline:hover { background: var(--paper-deep); }
+
+/* Climb bar: gentle attention pulse on the CTA */
+.climbBar .climbCta {
+  position: relative;
+}
+.climbBar .climbCta::after {
+  content: "";
+  position: absolute;
+  inset: -4px -8px;
+  border-radius: 999px;
+  border: 1px solid var(--ember);
+  opacity: 0;
+  animation: climbHalo 3.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes climbHalo {
+  0%   { opacity: 0; transform: scale(0.9); }
+  40%  { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+/* Respect reduced-motion users — disable all the loops + drifts. */
+@media (prefers-reduced-motion: reduce) {
+  .heroSplit::before,
+  .livePulseDot,
+  .activityFeed .activityItem--link:first-child .activityRowLink::before,
+  .climbBar .climbCta::after {
+    animation: none !important;
+  }
+  .heroSplitLeft > *,
+  .heroSplitRight,
+  .promptDemoQuote {
+    animation: none !important;
+  }
+}

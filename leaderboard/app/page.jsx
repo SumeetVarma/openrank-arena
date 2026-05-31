@@ -17,6 +17,8 @@ import {
 import { readClonedUnderdog } from "../lib/clonedBaseline.mjs";
 import Leaderboard from "./_components/Leaderboard.jsx";
 import PromptTabs from "./_components/PromptTabs.jsx";
+import CountUp from "./_components/CountUp.jsx";
+import LivePulse from "./_components/LivePulse.jsx";
 
 const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 const redis = HAS_KV
@@ -169,7 +171,10 @@ export default async function Page() {
   const feedbackRows = await getFeedbackRows();
 
   const topPlayer = [...rows].sort((a, b) => b.overall - a.overall)[0];
-  const totalMatches = recentActivity.filter((e) => e.kind !== "submission").length;
+  // Total submissions across all scenarios (count the actual submission events
+  // emitted by getRecentActivity — it already pulls latest-per-player-per-scenario).
+  const totalSubmissions = recentActivity.filter((e) => e.kind === "submission").length;
+  const lastEventAt = recentActivity[0]?.uploadedAt || recentActivity[0]?.ranAt || null;
 
   const recentSubmissions = recentActivity.filter((e) => e.kind === "submission");
   const recentActivityBlock = recentSubmissions.length > 0 ? (
@@ -185,14 +190,22 @@ export default async function Page() {
         {recentSubmissions.map((e, i) => {
           const scenario = scenarioList.find((s) => s.id === e.scenarioId);
           const when = relTime(e.ranAt || e.uploadedAt);
-          const href = `/players/${e.name}/${e.scenarioId}`;
+          // Link to the specific version so historical entries don't jump to
+          // whatever happens to be latest right now.
+          const href = e.version
+            ? `/players/${e.name}/${e.scenarioId}/v/${e.version}`
+            : `/players/${e.name}/${e.scenarioId}`;
+          const shortId = e.version ? String(e.version).slice(0, 6) : null;
           return (
             <li className="activityItem activityItem--link" key={`a${i}`}>
-              <a className="activityRowLink" href={href} aria-label={`${e.name}'s ${scenario?.shortLabel} v${e.version}`}>
+              <a className="activityRowLink" href={href} aria-label={`${e.name}'s ${scenario?.shortLabel} submission ${shortId || ""}`}>
                 <span className="activityWho">{e.name}</span>
-                <span className="activityVerb">uploaded</span>
+                <span className="activityVerb">submitted</span>
                 <span className="activityWhat">
-                  {scenario?.shortLabel} <span className="mono" style={{ color: "var(--ink-mute)" }}>v{e.version}</span>
+                  {scenario?.shortLabel}
+                  {shortId && (
+                    <span className="mono activityId">#{shortId}</span>
+                  )}
                 </span>
                 {e.note && (
                   <span className="activityNote">&ldquo;{e.note.length > 70 ? e.note.slice(0, 70) + "…" : e.note}&rdquo;</span>
@@ -216,6 +229,7 @@ export default async function Page() {
           OpenRank <em>Arena</em>
         </div>
         <nav className="mastheadMeta" aria-label="primary">
+          <LivePulse lastEventAt={lastEventAt} />
           <a href="#leaderboard">Leaderboard</a>
           <a href="#scenarios">Scenarios</a>
           <a href="#submit">How to play</a>
@@ -245,17 +259,17 @@ export default async function Page() {
               <a className="tlink" href="#leaderboard">View leaderboard</a>
             </div>
             <dl className="heroStats">
-              <div>
+              <div className="rise" style={{ animationDelay: "120ms" }}>
                 <dt>Players</dt>
-                <dd className="tnum">{players.length}</dd>
+                <dd><CountUp value={players.length} /></dd>
               </div>
-              <div>
-                <dt>Matches run</dt>
-                <dd className="tnum">{totalMatches}</dd>
+              <div className="rise" style={{ animationDelay: "200ms" }}>
+                <dt>Submissions</dt>
+                <dd><CountUp value={totalSubmissions} /></dd>
               </div>
-              <div>
+              <div className="rise" style={{ animationDelay: "280ms" }}>
                 <dt>Top Elo</dt>
-                <dd className="tnum">{topPlayer ? Math.round(topPlayer.overall) : 1000}</dd>
+                <dd><CountUp value={topPlayer ? Math.round(topPlayer.overall) : 1000} /></dd>
               </div>
             </dl>
           </div>
