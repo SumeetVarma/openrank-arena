@@ -127,8 +127,7 @@ body::before {
 /* Top masthead */
 .masthead {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--s-5);
   padding-bottom: var(--s-4);
   margin-bottom: var(--s-7);
@@ -144,6 +143,7 @@ body::before {
   color: var(--ink);
   line-height: 1;
   font-variation-settings: "opsz" 96, "SOFT" 0;
+  margin-right: auto;
 }
 .mastheadBrand em {
   font-style: italic;
@@ -153,7 +153,8 @@ body::before {
 }
 .mastheadMeta {
   display: flex;
-  gap: var(--s-5);
+  align-items: center;
+  gap: 22px;
   font-family: var(--font-mono);
   font-size: var(--t-xs);
   text-transform: uppercase;
@@ -163,6 +164,20 @@ body::before {
 .mastheadMeta a:hover { color: var(--ember); }
 .mastheadMeta span,
 .mastheadMeta a { white-space: nowrap; }
+/* The live pulse stays as the leftmost item of the nav cluster, with a thin
+   rule between it and the nav links so it reads as a separate signal. */
+.mastheadMeta .livePulse {
+  margin-right: 6px;
+  padding-right: 22px;
+  border-right: 1px solid var(--rule);
+}
+@media (max-width: 720px) {
+  .mastheadMeta { gap: 14px; }
+  .mastheadMeta .livePulse {
+    padding-right: 12px;
+    margin-right: 0;
+  }
+}
 
 /* ──────────────────────────────────────────────────────────────
    Typography primitives
@@ -2944,156 +2959,36 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   100% { opacity: 0; transform: scale(1.08); }
 }
 
-/* Scenario card: starter.zip download chip */
-.featureStarter {
-  margin-left: auto;
+/* Submit page: "git clone the repo" link in the zip-anatomy header */
+.starterRepoLink {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
-  padding: 3px 8px;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: var(--paper);
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
-}
-.featureStarter:hover {
-  background: var(--ink);
-  color: var(--paper-light);
-  border-color: var(--ink);
-}
-
-/* Submit-page starter dropdown */
-.starterDownloads {
-  position: relative;
-}
-.starterDownloads > summary {
-  cursor: pointer;
-  list-style: none;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: var(--t-mono-sm);
+  letter-spacing: 0.04em;
   color: var(--ink-mute);
+  text-decoration: none;
   padding: 4px 10px;
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: var(--paper);
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
 }
-.starterDownloads > summary::-webkit-details-marker { display: none; }
-.starterDownloads > summary:hover { color: var(--ember); border-color: var(--ember-soft); }
-.starterDownloads[open] > summary {
-  color: var(--ember);
-  border-color: var(--ember-soft);
+.starterRepoLink:hover {
+  color: var(--paper-light);
+  background: var(--ink);
+  border-color: var(--ink);
 }
-.starterDownloads ul {
-  position: absolute;
-  right: 0;
-  margin-top: 8px;
-  list-style: none;
-  padding: 6px;
-  background: var(--paper-light);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  box-shadow: 0 12px 28px -16px rgba(40, 30, 20, 0.25);
-  min-width: 220px;
-  z-index: 20;
-}
-.starterDownloads li { margin: 0; }
-.starterDownloads li a {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--ink);
-  font-size: 14px;
-  transition: background 120ms ease;
-}
-.starterDownloads li a:hover { background: var(--paper-deep); }
-.starterDownloads li a .mono {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--ink-mute);
-}
+.starterRepoLink .mono { color: var(--ember); }
+.starterRepoLink:hover .mono { color: var(--ember-soft); }
 
 /* ──────────────────────────────────────────────────────────────
-   Prize board
+   Final round callout — promoted to a top-level section right
+   after the leaderboard, so the hidden-set rule isn't buried.
    ────────────────────────────────────────────────────────────── */
-.prizeBoard {
-  margin: var(--s-5) 0 0;
-  padding: var(--s-5) var(--s-6);
-  background: var(--paper-light);
-  border: 1px solid var(--rule);
-  border-radius: 12px;
+.finalRoundSection {
+  margin-top: var(--s-5);
+  margin-bottom: var(--s-5);
 }
-.prizeBoard h3 {
-  margin: 0 0 var(--s-4);
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(22px, 2.2vw, 28px);
-  letter-spacing: -0.018em;
-  color: var(--ink);
-  font-variation-settings: "opsz" 96, "SOFT" 20;
-}
-.prizeList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--s-3);
-}
-@media (max-width: 720px) {
-  .prizeList { grid-template-columns: 1fr; }
-}
-.prizeRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px 16px;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 10px;
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-.prizeRow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px -10px rgba(40, 30, 20, 0.18);
-}
-.prizeRow--gold   { border-left: 3px solid #c89b2c; }
-.prizeRow--silver { border-left: 3px solid #9aa3ac; }
-.prizeRow--bronze { border-left: 3px solid #a0673d; }
-.prizeRow--wood   { border-left: 3px solid var(--ink-mute); }
-.prizeMedal {
-  font-size: 26px;
-  line-height: 1;
-  margin-top: 2px;
-  filter: saturate(1.1);
-}
-.prizeTitle {
-  margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 17px;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  font-variation-settings: "opsz" 48, "SOFT" 20;
-}
-.prizeSub {
-  margin: 0;
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--ink-soft);
-}
-
-/* ──────────────────────────────────────────────────────────────
-   Final round callout
-   ────────────────────────────────────────────────────────────── */
 .finalRoundCallout {
-  margin: var(--s-6) 0 0;
   padding: var(--s-5) var(--s-6);
   background:
     linear-gradient(90deg, rgba(197, 69, 12, 0.08), rgba(90, 58, 82, 0.05) 70%, transparent);
@@ -3105,18 +3000,129 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   margin: 0 0 8px;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(22px, 2.2vw, 28px);
+  font-size: var(--t-h3);
   letter-spacing: -0.018em;
   color: var(--ink);
   font-variation-settings: "opsz" 96, "SOFT" 20;
 }
 .finalRoundCallout p {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--t-body);
   line-height: 1.55;
   color: var(--ink-soft);
   max-width: 70ch;
 }
+.finalRoundCallout--prominent {
+  padding: var(--s-6) var(--s-7);
+  background:
+    radial-gradient(120% 200% at 0% 50%, rgba(197, 69, 12, 0.14), transparent 60%),
+    linear-gradient(180deg, rgba(90, 58, 82, 0.04), rgba(197, 69, 12, 0.02));
+  border-left-width: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.finalRoundCallout--prominent::before {
+  content: "🔒";
+  position: absolute;
+  right: var(--s-6);
+  top: var(--s-5);
+  font-size: clamp(48px, 6vw, 72px);
+  opacity: 0.12;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.finalRoundCallout--prominent .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--ember);
+  margin: 0 0 6px;
+}
+.finalRoundCallout--prominent h3 {
+  font-size: clamp(28px, 3.4vw, 40px);
+  margin-bottom: var(--s-3);
+  letter-spacing: -0.022em;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+.finalRoundCallout--prominent p {
+  font-size: var(--t-lede);
+  max-width: 64ch;
+}
+.finalAcc {
+  font-style: italic;
+  color: var(--ember);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  background: linear-gradient(180deg, transparent 62%, rgba(197, 69, 12, 0.15) 62% 90%, transparent 90%);
+  padding: 0 4px;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Type scale tokens (audit pass — unify font-size across the page)
+   ────────────────────────────────────────────────────────────── */
+:root {
+  --t-mono-xs:  10px;   /* eyebrows, chip text */
+  --t-mono-sm:  11px;   /* nav, meta strings */
+  --t-mono:     12.5px; /* code blocks, judge prompt body */
+  --t-body-sm:  13.5px; /* card sub-copy, table secondary */
+  --t-body:     15px;   /* paragraphs, list items, table body */
+  --t-lede:     17px;   /* lede paragraphs, scenario buyer quote */
+  --t-h3:       clamp(22px, 2.2vw, 28px);
+  --t-h2:       clamp(28px, 3vw, 40px);
+  --t-h1:       clamp(44px, 6vw, 76px);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Leaderboard — make clickability obvious
+   ────────────────────────────────────────────────────────────── */
+.lbHint {
+  margin: 12px 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--t-mono-sm);
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+}
+.lbHintDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ember);
+  animation: livePulseRing 2.4s ease-out infinite;
+}
+
+/* Clickable Elo cells get explicit affordance: ember underline-on-hover,
+   ember tint when the cell has a real submission. */
+.lbCell--num .lbCellLink {
+  color: var(--ember-deep);
+  border-bottom: 1px dotted rgba(197, 69, 12, 0.4);
+  text-decoration: none;
+  padding-bottom: 1px;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.lbCell--num .lbCellLink::after {
+  content: " ↗";
+  font-size: 0.7em;
+  color: var(--ink-mute);
+  opacity: 0.5;
+  transition: opacity 120ms ease, transform 160ms ease;
+  display: inline-block;
+}
+.lbCell--num .lbCellLink:hover {
+  color: var(--ember);
+  border-bottom-color: var(--ember);
+  background: rgba(197, 69, 12, 0.07);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.lbCell--num .lbCellLink:hover::after {
+  opacity: 1;
+  transform: translateX(2px) translateY(-1px);
+}
+/* Unranked cells stay muted — no link affordance */
+.lbCell--unranked { color: var(--ink-mute); }
 
 /* ──────────────────────────────────────────────────────────────
    Judge prompt viewer
@@ -3297,12 +3303,128 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   box-shadow: 0 0 0 3px rgba(197, 69, 12, 0.12);
 }
 
+/* ──────────────────────────────────────────────────────────────
+   Quirk layer — small, characterful interactions
+   ────────────────────────────────────────────────────────────── */
+
+/* The hero's #10 gets a slow blink-cursor sibling to feel typewriter-ish */
+.heroFinalHead .acc {
+  position: relative;
+}
+.heroFinalHead .acc::after {
+  content: "_";
+  font-style: normal;
+  color: var(--ember);
+  margin-left: 4px;
+  font-variation-settings: "opsz" 144;
+  animation: caretBlink 1.05s steps(2, end) infinite;
+}
+@keyframes caretBlink {
+  0%, 50%   { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* Scenario card image: subtle parallax — slow on idle, snappy on hover */
+.featureCard .featureImage img {
+  transform: scale(1.02);
+  filter: saturate(0.96);
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1), filter 600ms ease;
+}
+.featureCard:hover .featureImage img {
+  transform: scale(1.07);
+  filter: saturate(1.08);
+}
+
+/* Scenario category label gets a tiny diamond glyph that spins on card hover */
+.featureCard .featureCategory::before {
+  content: "◆";
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--card-accent, var(--ember));
+  font-size: 0.7em;
+  vertical-align: 1px;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.featureCard:hover .featureCategory::before {
+  transform: rotate(180deg);
+}
+
+/* Hero stats: small unit badge under each number — feels like a real metric */
+.heroStats dd {
+  position: relative;
+}
+.heroStats > div:first-child dd::after {
+  content: "live";
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #21a35a;
+}
+.heroStats > div:nth-child(2) dd::after {
+  content: "uploaded";
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.heroStats > div:nth-child(3) dd::after {
+  content: "elo · k=32";
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ember);
+}
+
+/* Live pulse: little bracket on each side, monospace */
+.livePulseLabel::before { content: "["; color: var(--ink-mute); margin-right: 4px; }
+.livePulseLabel::after  { content: "]"; color: var(--ink-mute); margin-left: 4px; }
+
+/* Submit-strip: turn the section's eyebrow into a typing-cursor */
+.submitThreeUp .zipPanel .zipPanelTitle::after {
+  content: "_";
+  color: var(--ember);
+  margin-left: 4px;
+  animation: caretBlink 1.05s steps(2, end) infinite;
+}
+
+/* Footer: "made with respect" */
+.siteFoot::after {
+  content: "🫡";
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 1.2em;
+  transition: transform 300ms ease;
+}
+.siteFoot:hover::after {
+  transform: rotate(-12deg) scale(1.15);
+}
+
+/* Leaderboard: numeric rank gets a hover wiggle on top-3 rows */
+.lbTable tbody tr.lbRow:nth-child(-n+3) .lbRank {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), color 220ms ease;
+}
+.lbTable tbody tr.lbRow:nth-child(1):hover .lbRank { transform: scale(1.25); color: #c89b2c; }
+.lbTable tbody tr.lbRow:nth-child(2):hover .lbRank { transform: scale(1.18); color: #9aa3ac; }
+.lbTable tbody tr.lbRow:nth-child(3):hover .lbRank { transform: scale(1.12); color: #a0673d; }
+
 /* Respect reduced-motion users — disable all the loops + drifts. */
 @media (prefers-reduced-motion: reduce) {
   .heroSplit::before,
   .livePulseDot,
   .activityFeed .activityItem--link:first-child .activityRowLink::before,
-  .climbBar .climbCta::after {
+  .climbBar .climbCta::after,
+  .heroFinalHead .acc::after,
+  .submitThreeUp .zipPanel .zipPanelTitle::after,
+  .lbHintDot {
     animation: none !important;
   }
   .heroSplitLeft > *,

@@ -61,6 +61,22 @@ export async function POST(request) {
     }
   }
 
+  // Anti-orphan guard: every player entrant must have a current submission
+  // for this scenario. Otherwise we'd write Elo + duel records against a
+  // ghost — exactly how the sumeet/dental orphan got created earlier.
+  if (redis) {
+    for (const ref of ranking) {
+      if (entrantKinds[ref] !== "player") continue;
+      const latest = await redis.get(`submission:${String(ref).toLowerCase()}:${scenarioId}:latest`);
+      if (!latest) {
+        return json({
+          ok: false,
+          error: `Player "${ref}" has no submission for scenario "${scenarioId}". Submit a page first, then run the match.`
+        }, 400);
+      }
+    }
+  }
+
   // Ensure player records exist for any 'player' kind entrants
   for (const ref of ranking) {
     if (entrantKinds[ref] === "player") {

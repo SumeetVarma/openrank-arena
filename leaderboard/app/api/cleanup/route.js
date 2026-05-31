@@ -40,6 +40,32 @@ export async function POST(request) {
   }
 
   const deleted = [];
+
+  // Orphan-Elo audit: wipe any (player, scenario) Elo + duel entries where
+  // the player has no submission for that scenario. Triggered by passing
+  // names:["__orphans__"] — handled separately from named-player deletion.
+  if (names.length === 1 && names[0] === "__orphans__") {
+    const orphans = [];
+    const allPlayers = (await redis.smembers("players:all")) || [];
+    for (const name of allPlayers) {
+      const eloHash = (await redis.hgetall(`elo:${name}`)) || {};
+      const duelsHash = (await redis.hgetall(`duels:${name}`)) || {};
+      const fieldsToCheck = new Set([...Object.keys(eloHash), ...Object.keys(duelsHash)]);
+      for (const scenario of fieldsToCheck) {
+        if (scenario === "overall") continue;
+        if (!scenarioIds.includes(scenario)) continue;
+        const latest = await redis.get(`submission:${name}:${scenario}:latest`);
+        if (!latest) {
+          // No submission for this scenario → wipe the orphan Elo + duel field
+          await redis.hdel(`elo:${name}`, scenario);
+          await redis.hdel(`duels:${name}`, scenario);
+          orphans.push({ name, scenario });
+        }
+      }
+    }
+    return json({ ok: true, orphansWiped: orphans });
+  }
+
   for (const raw of names) {
     const name = String(raw).toLowerCase().trim();
     if (!name) continue;

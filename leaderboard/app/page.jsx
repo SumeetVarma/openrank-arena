@@ -302,6 +302,23 @@ export default async function Page() {
           ) : (
             <Leaderboard rows={tableRows} scenarios={scenariosMeta} />
           )}
+          <p className="lbHint">
+            <span className="lbHintDot" aria-hidden />
+            <span>click any Elo number to read that exact submission · sortable headers</span>
+          </p>
+        </section>
+
+        {/* ── Final round rule — promoted to right after the leaderboard ── */}
+        <section className="section finalRoundSection scrollAnchor" id="final-round">
+          <aside className="finalRoundCallout finalRoundCallout--prominent">
+            <p className="eyebrow">Final round</p>
+            <h3>Final ranking is on a <span className="finalAcc">hidden dataset</span>.</h3>
+            <p>
+              At the end of the competition, every submission is re-judged on a held-out set of
+              scenarios nobody has seen. Hand-tuning the three visible pages won&apos;t cut it —
+              build a real pipeline that generalizes.
+            </p>
+          </aside>
         </section>
 
         {recentActivityBlock}
@@ -357,9 +374,6 @@ export default async function Page() {
                     </p>
                     <div className="featureActions">
                       <a className="tlink" href={`/baseline/${scenario.id}`}>View baseline →</a>
-                      <a className="tlink featureStarter" href={`/baseline/${scenario.id}/starter.zip`} download>
-                        ↓ starter.zip
-                      </a>
                     </div>
                   </div>
                 </div>
@@ -408,51 +422,6 @@ export default async function Page() {
               </div>
             </li>
           </ol>
-
-          <aside className="finalRoundCallout">
-            <p className="eyebrow" style={{ marginBottom: 6 }}>Final round</p>
-            <h3>Final ranking is on a hidden dataset.</h3>
-            <p>
-              At the end of the competition, every submission is re-judged on a held-out set of
-              scenarios nobody has seen. Hand-tuning the three visible pages won&apos;t cut it —
-              build a real pipeline that generalizes.
-            </p>
-          </aside>
-
-          <aside className="prizeBoard" id="prizes">
-            <p className="eyebrow" style={{ marginBottom: 6 }}>Prizes</p>
-            <h3>What you&apos;re actually playing for</h3>
-            <ul className="prizeList">
-              <li className="prizeRow prizeRow--gold">
-                <span className="prizeMedal" aria-hidden>🥇</span>
-                <div>
-                  <p className="prizeTitle">Respect.</p>
-                  <p className="prizeSub">Pinned at the top of the board until someone takes it from you.</p>
-                </div>
-              </li>
-              <li className="prizeRow prizeRow--silver">
-                <span className="prizeMedal" aria-hidden>🥈</span>
-                <div>
-                  <p className="prizeTitle">Cope rights.</p>
-                  <p className="prizeSub">License to say &ldquo;I was robbed by the hidden set.&rdquo;</p>
-                </div>
-              </li>
-              <li className="prizeRow prizeRow--bronze">
-                <span className="prizeMedal" aria-hidden>🥉</span>
-                <div>
-                  <p className="prizeTitle">A coffee.</p>
-                  <p className="prizeSub">Winner buys. You earned it by being slightly more credible than a baseline LLM.</p>
-                </div>
-              </li>
-              <li className="prizeRow prizeRow--wood">
-                <span className="prizeMedal" aria-hidden>🪵</span>
-                <div>
-                  <p className="prizeTitle">Last place.</p>
-                  <p className="prizeSub">Custom title in the group chat. Non-negotiable. Lasts one month.</p>
-                </div>
-              </li>
-            </ul>
-          </aside>
 
           <div className="howCta">
             <p>Ready?</p>

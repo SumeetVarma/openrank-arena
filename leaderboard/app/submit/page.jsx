@@ -102,18 +102,9 @@ export default function SubmitPage() {
             <div className="zipPanel">
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
                 <p className="zipPanelTitle" style={{ margin: 0 }}>What goes in the zip</p>
-                <details className="starterDownloads">
-                  <summary>Start from a template ↓</summary>
-                  <ul>
-                    {scenarioList.map((s) => (
-                      <li key={s.id}>
-                        <a href={`/baseline/${s.id}/starter.zip`} download>
-                          {s.shortLabel}<span className="mono"> starter.zip</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
+                <a className="starterRepoLink" href="https://github.com/SumeetVarma/openrank-arena" target="_blank" rel="noopener noreferrer">
+                  <span className="mono">git clone</span> the repo →
+                </a>
               </div>
               <ul className="zipList">
                 <li>
