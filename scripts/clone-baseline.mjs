@@ -277,8 +277,11 @@ async function cloneOne(ctx, src) {
     }
   }
 
-  // Spoof brand names + rewrite image URLs to local paths
+  // Smart brand-name spoofing: only inside visible text and select attributes,
+  // never inside href= / src= / url() / domain-name strings, otherwise we
+  // mangle Shopify CDN paths into nonsense like "wayfare%2042designs.com".
   const spoof = (s) => spoofText(s, src.realBrandTerms, src.brandName);
+  const spoofHtmlSafe = (html) => spoofHtmlPreservingUrls(html, src.realBrandTerms, src.brandName);
   const rewriteImgSrcs = (html) => {
     let out = html;
     for (const [orig, local] of imgRemap) {
@@ -293,15 +296,23 @@ async function cloneOne(ctx, src) {
   };
 
   const titleSpoofed = spoof(captured.title);
-  const bodySpoofed = rewriteImgSrcs(spoof(captured.bodyHtml));
+  // For HTML body: strip remote <link rel=stylesheet>, drop <img> with unresolved
+  // remote src (we've already remapped local ones), then spoof safely.
+  const cleanedBody = stripDeadResources(captured.bodyHtml);
+  const bodySpoofed = spoofHtmlSafe(rewriteImgSrcs(cleanedBody));
   const metasSpoofed = captured.metas
     .map((m) => {
-      const content = m.name === "viewport" ? m.content : spoof(rewriteImgSrcs(m.content));
+      const isUrl = /url|href|image/i.test(m.property || m.name || "");
+      const content = m.name === "viewport"
+        ? m.content
+        : isUrl
+          ? rewriteImgSrcs(m.content)
+          : spoof(rewriteImgSrcs(m.content));
       const attr = m.property ? `property="${m.property}"` : `name="${m.name}"`;
       return `<meta ${attr} content="${escapeAttr(content)}">`;
     })
     .join("\n  ");
-  const jsonLdSpoofed = captured.jsonLd.map((j) => spoof(rewriteImgSrcs(j)));
+  const jsonLdSpoofed = captured.jsonLd.map((j) => spoofJsonLd(j, src.realBrandTerms, src.brandName, rewriteImgSrcs));
 
   // Build the standalone HTML
   const indexHtml = `<!DOCTYPE html>
@@ -383,6 +394,67 @@ function spoofText(text, realTerms, brandName) {
     out = out.replace(re, brandName);
   }
   return out;
+}
+
+// Spoof brand names in HTML while leaving URLs/href/src untouched. URLs that
+// happen to contain the brand name (e.g. cdn paths) would otherwise get
+// "Wayfare 42" injected, breaking resolution.
+function spoofHtmlPreservingUrls(html, realTerms, brandName) {
+  // Replace inside text nodes only, by splitting on tags first.
+  // Quick approach: tokenize tags vs text; only spoof text.
+  return html.replace(/(<[^>]+>)|([^<]+)/g, (_, tag, text) => {
+    if (tag) {
+      // Spoof inside SELECTED attribute values: alt, title, aria-label, content
+      return tag.replace(
+        /(alt|title|aria-label|content)=("([^"]*)"|'([^']*)')/gi,
+        (_m, attr, _quoted, dq, sq) => {
+          const v = dq != null ? dq : sq;
+          const spoofed = spoofText(v, realTerms, brandName).replace(/"/g, "&quot;");
+          return `${attr}="${spoofed}"`;
+        }
+      );
+    }
+    return spoofText(text, realTerms, brandName);
+  });
+}
+
+// Spoof brand names inside JSON-LD: parse, walk strings, but never touch
+// fields that look like URLs (url, image, sameAs, @id).
+function spoofJsonLd(jsonText, realTerms, brandName, rewriteImgSrcs) {
+  let parsed;
+  try { parsed = JSON.parse(jsonText); } catch { return spoofText(jsonText, realTerms, brandName); }
+  const urlKeys = new Set(["url", "@id", "image", "logo", "sameAs", "contentUrl", "thumbnailUrl"]);
+  function walk(node) {
+    if (Array.isArray(node)) return node.map(walk);
+    if (node && typeof node === "object") {
+      const out = {};
+      for (const [k, v] of Object.entries(node)) {
+        if (urlKeys.has(k)) {
+          out[k] = typeof v === "string" ? rewriteImgSrcs(v) : walk(v);
+        } else {
+          out[k] = walk(v);
+        }
+      }
+      return out;
+    }
+    if (typeof node === "string") return spoofText(node, realTerms, brandName);
+    return node;
+  }
+  return JSON.stringify(walk(parsed));
+}
+
+// Strip <link rel=stylesheet>, <link rel=preload as=style/script/font>, and
+// <img> tags whose src points at a remote domain we couldn't download. This
+// keeps the page from spraying console errors and from failing in production
+// when the cloned page references the original site's CDN.
+function stripDeadResources(html) {
+  return html
+    // Drop external stylesheets
+    .replace(/<link\b[^>]*rel=["'](?:stylesheet|preload)["'][^>]*>/gi, "")
+    // Drop <img> with src pointing at any http(s) domain (we remap successful ones earlier)
+    .replace(/<img\b[^>]*src=["']https?:\/\/[^"']+["'][^>]*>/gi, "")
+    // Drop background-image: url(http...) inline styles
+    .replace(/background(?:-image)?\s*:\s*url\(['"]?https?:[^'")]+['"]?\)/gi, "");
 }
 
 function escapeHtml(s) {
