@@ -421,6 +421,41 @@ export default async function Page() {
             </p>
           </aside>
 
+          <aside className="prizeBoard" id="prizes">
+            <p className="eyebrow" style={{ marginBottom: 6 }}>Prizes</p>
+            <h3>What you&apos;re actually playing for</h3>
+            <ul className="prizeList">
+              <li className="prizeRow prizeRow--gold">
+                <span className="prizeMedal" aria-hidden>🥇</span>
+                <div>
+                  <p className="prizeTitle">Respect.</p>
+                  <p className="prizeSub">Pinned at the top of the board until someone takes it from you.</p>
+                </div>
+              </li>
+              <li className="prizeRow prizeRow--silver">
+                <span className="prizeMedal" aria-hidden>🥈</span>
+                <div>
+                  <p className="prizeTitle">Cope rights.</p>
+                  <p className="prizeSub">License to say &ldquo;I was robbed by the hidden set.&rdquo;</p>
+                </div>
+              </li>
+              <li className="prizeRow prizeRow--bronze">
+                <span className="prizeMedal" aria-hidden>🥉</span>
+                <div>
+                  <p className="prizeTitle">A coffee.</p>
+                  <p className="prizeSub">Winner buys. You earned it by being slightly more credible than a baseline LLM.</p>
+                </div>
+              </li>
+              <li className="prizeRow prizeRow--wood">
+                <span className="prizeMedal" aria-hidden>🪵</span>
+                <div>
+                  <p className="prizeTitle">Last place.</p>
+                  <p className="prizeSub">Custom title in the group chat. Non-negotiable. Lasts one month.</p>
+                </div>
+              </li>
+            </ul>
+          </aside>
+
           <div className="howCta">
             <p>Ready?</p>
             <a className="btn" href="#submit">Submit your first page</a>

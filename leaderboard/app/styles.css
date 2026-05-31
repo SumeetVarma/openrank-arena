@@ -2945,6 +2945,76 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Prize board
+   ────────────────────────────────────────────────────────────── */
+.prizeBoard {
+  margin: var(--s-5) 0 0;
+  padding: var(--s-5) var(--s-6);
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+.prizeBoard h3 {
+  margin: 0 0 var(--s-4);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(22px, 2.2vw, 28px);
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+}
+.prizeList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 720px) {
+  .prizeList { grid-template-columns: 1fr; }
+}
+.prizeRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.prizeRow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px -10px rgba(40, 30, 20, 0.18);
+}
+.prizeRow--gold   { border-left: 3px solid #c89b2c; }
+.prizeRow--silver { border-left: 3px solid #9aa3ac; }
+.prizeRow--bronze { border-left: 3px solid #a0673d; }
+.prizeRow--wood   { border-left: 3px solid var(--ink-mute); }
+.prizeMedal {
+  font-size: 26px;
+  line-height: 1;
+  margin-top: 2px;
+  filter: saturate(1.1);
+}
+.prizeTitle {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 48, "SOFT" 20;
+}
+.prizeSub {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* ──────────────────────────────────────────────────────────────
    Final round callout
    ────────────────────────────────────────────────────────────── */
 .finalRoundCallout {
