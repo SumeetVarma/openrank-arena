@@ -101,20 +101,30 @@ old versions stay browseable at `/players/<name>/<scenario>/v/<version>`.
 
 See [`submission-template/`](./submission-template/) for an example zip layout.
 
-## Running the judge
+## Running judge duels
+
+Three commands, all auto-sync results to the deployed leaderboard:
 
 ```bash
-cd leaderboard
-npm install
-# set env vars from .env.example
-npm run dev      # http://localhost:3000
+# Set once
+export ARENA_BASE_URL=https://openrank-arena.vercel.app
+export ARENA_SHARED_PASSWORD=WANNABE_FOUNDERS
+export ANTHROPIC_API_KEY=sk-ant-...
 
-# in another terminal
-cd harness
-ARENA_BASE_URL=http://localhost:3000 \
-ANTHROPIC_API_KEY=sk-... \
-node run-judge.mjs --scenario carryon --players alice,bob,sumeet
+# 1v1 duel
+node harness/duel.mjs --scenario carryon --a alice --b bob
+
+# Free-for-all (N-way bout, all listed players + baseline)
+node harness/bout.mjs --scenario carryon --players alice,bob,sumeet
+node harness/bout.mjs --scenario carryon --all
+
+# Full round-robin across all submitted players + baseline
+node harness/round.mjs --scenario carryon
+node harness/round.mjs --all  # every scenario
 ```
+
+Each duel/bout updates Elo for everyone involved. Baseline is anchored at 1000 Elo and
+never moves. Players seed at 1000, target ~2000.
 
 Output: the judge's plain-language recommendation, the labeled candidate map, the parsed JSON,
 and per-player scores.

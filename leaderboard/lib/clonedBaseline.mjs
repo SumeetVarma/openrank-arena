@@ -77,7 +77,12 @@ export function splitClonedHtml(fullHtml) {
     .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, "")
     .replace(/<template\b[^>]*>[\s\S]*?<\/template>/gi, "")
     // Strip stray <link> from body
-    .replace(/<link\b[^>]*\/?>/gi, "");
+    .replace(/<link\b[^>]*\/?>/gi, "")
+    // Strip <img> tags with no src OR remote/protocol-relative src — these break
+    // hydration. We only allow img tags that point to our local assets/ path.
+    .replace(/<img\b(?![^>]*\bsrc=)[^>]*\/?>/gi, "") // no src at all
+    .replace(/<img\b[^>]*\bsrc=["'](?:https?:)?\/\/[^"']*["'][^>]*\/?>/gi, "") // remote http(s):// or //
+    .replace(/<img\b[^>]*\bsrc=["']data:[^"']*["'][^>]*\/?>/gi, ""); // data: URIs
 
   // Extract structured tags from head
   const metaTags = [];
