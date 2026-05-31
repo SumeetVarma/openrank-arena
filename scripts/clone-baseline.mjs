@@ -69,8 +69,8 @@ const SOURCES = [
     kind: "incumbent",
     slug: "cedar-hill",
     brandName: "Cedar Hill Family Dentistry",
-    realBrandTerms: ["Blunn Creek Family Dentistry", "Blunn Creek Dental", "Blunn Creek"],
-    sourceUrl: "https://www.blunncreekdental.com/"
+    realBrandTerms: ["Broberg Family Dental", "Broberg"],
+    sourceUrl: "https://www.brobergfamilydental.com/"
   },
   {
     scenario: "dental",
@@ -194,11 +194,30 @@ async function cloneOne(ctx, src) {
 
     // Inline body content — strip scripts, iframes, modals, but keep semantic HTML
     const bodyClone = document.body.cloneNode(true);
-    bodyClone.querySelectorAll("script, noscript, iframe").forEach((n) => n.remove());
-    // Remove typical noise: chat widgets, cookie banners, popups, footers' newsletter
-    bodyClone.querySelectorAll(
-      '[class*="cookie"], [class*="popup"], [class*="modal"], [class*="chat"], [id*="cookie"], [id*="popup"], [aria-label*="cookie" i], [aria-label*="dialog" i], [role="dialog"]'
-    ).forEach((n) => n.remove());
+    bodyClone.querySelectorAll("script, noscript, iframe, style").forEach((n) => n.remove());
+    // Remove typical noise: chat widgets, cookie banners, popups, consent UIs,
+    // newsletter signups, account/login chrome, search chrome, ratings widgets.
+    const noiseSelectors = [
+      '[class*="cookie" i]', '[class*="popup" i]', '[class*="modal" i]', '[class*="chat" i]',
+      '[id*="cookie" i]', '[id*="popup" i]', '[id*="consent" i]', '[id*="pd-cp"]',
+      '[aria-label*="cookie" i]', '[aria-label*="dialog" i]', '[role="dialog"]',
+      'header', 'footer', 'nav',
+      '[class*="newsletter" i]', '[class*="navbar" i]', '[class*="header" i]',
+      '[class*="footer" i]', '[class*="cart" i]', '[class*="drawer" i]',
+      '[class*="account" i]', '[class*="login" i]', '[class*="signin" i]',
+      '[id*="onetrust" i]', '[class*="onetrust" i]',
+      '[class*="Pandectes" i]', '[id*="Pandectes" i]', '[id*="pandectes" i]',
+      'form'
+    ];
+    bodyClone.querySelectorAll(noiseSelectors.join(", ")).forEach((n) => n.remove());
+    // Remove elements that contain "Add to cart" / "Sign up" / similar nav noise
+    bodyClone.querySelectorAll("button, a").forEach((el) => {
+      const t = (el.textContent || "").toLowerCase();
+      if (/add to cart|sign up|subscribe|create account|login|sign in|close|menu|cart\b/i.test(t)) {
+        if (el.tagName === "BUTTON") el.remove();
+        else el.removeAttribute("href");
+      }
+    });
     // Strip class names from internal divs to dramatically shrink the file
     bodyClone.querySelectorAll("[class]").forEach((el) => el.removeAttribute("class"));
     bodyClone.querySelectorAll("[style]").forEach((el) => el.removeAttribute("style"));
