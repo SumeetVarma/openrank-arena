@@ -12,6 +12,7 @@ import {
   getOverallLeaderboard,
   BASELINE_NAME
 } from "../lib/elo.mjs";
+import { readClonedUnderdog } from "../lib/clonedBaseline.mjs";
 
 const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 const redis = HAS_KV
@@ -21,21 +22,33 @@ const redis = HAS_KV
     })
   : null;
 
-// Typographic glyphs per scenario — Fraunces italic ligatures give each category
-// a distinct typographic mark without leaning on color.
-const SCENARIO_GLYPH = {
-  carryon: "f₄₂",       // a carry-on packed glyph
-  dental: "M",          // Maple, mouth, mandible — refined "M"
-  "aeo-tool": "&"        // ampersand = "you, and the AI"
+const SCENARIO_TAG = {
+  carryon: "Consumer goods · Round 01",
+  dental: "Local service · Round 02",
+  "aeo-tool": "B2B SaaS · Round 03"
 };
 
-const SCENARIO_BLURB = {
-  carryon:
-    "A real ~#10-class travel pack page, brand swapped to Wayfare 42. Real specs, real trade-offs, real headroom.",
-  dental:
-    "A small Austin family dental practice. Soft hours, gentle copy, no enterprise dental-group polish. Beat the two Austin incumbents at a buyer's local-fit query.",
-  "aeo-tool":
-    "The meta scenario. OpenRank, an AEO startup, competing with two established AEO/SEO platforms. The product that wants visibility — fighting for visibility."
+// Short feature copy per scenario — punchy not literary
+const SCENARIO_FEATURE = {
+  carryon: {
+    headline: "Wayfare 42",
+    versus: "vs Voyager Pro 40, Roamcore",
+    blurb:
+      "A real ~#10 travel pack. Brand swapped, copy intact. Beat two carry-on heavyweights at one buyer's value query."
+  },
+  dental: {
+    headline: "Maple Street Dental",
+    versus: "vs Cedar Hill, Parmer Lane",
+    blurb:
+      "A small Austin family practice. Soft hours, warmer copy, less polish. Out-rank two established neighborhood incumbents."
+  },
+  "aeo-tool": {
+    headline: "OpenRank",
+    versus: "vs Lumen AEO, Vantage AI",
+    blurb:
+      "The meta-scenario: a young AEO startup competing with two established AEO/SEO platforms for one buyer's tool query.",
+    meta: "Life is incomplete without Meta :p"
+  }
 };
 
 async function readJson(file, fallback) {
@@ -46,67 +59,27 @@ async function readJson(file, fallback) {
   }
 }
 
-function Avatar({ name }) {
-  const initial = (name || "?").slice(0, 1).toUpperCase();
-  return <span className="avatar" aria-hidden="true">{initial}</span>;
-}
-
-function BoardRows({ rows, valueKey = "rating", showDuels = false }) {
-  if (!rows.length) {
-    return <p className="boardEmpty">No duels yet. The board lights up after the first match.</p>;
-  }
-  return (
-    <ol className="boardList">
-      {rows.slice(0, 8).map((row, i) => {
-        const isBaseline = row.player === BASELINE_NAME;
-        const isLeader = i === 0 && !isBaseline;
-        const classes = ["boardRow"];
-        if (isBaseline) classes.push("is-baseline");
-        if (isLeader) classes.push("is-leader");
-        const elo = Math.round(row[valueKey] ?? row.rating);
-        return (
-          <li key={row.player} className={classes.join(" ")}>
-            <span className="boardRank">{String(i + 1).padStart(2, "0")}</span>
-            <span className="boardName">
-              {isBaseline ? "baseline" : <a href={`/players/${row.player}`}>{row.player}</a>}
-            </span>
-            <span className="boardElo tnum">{elo}</span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
-function MiniBoard({ rows }) {
-  if (!rows.length) {
-    return <p className="boardEmpty">No duels yet.</p>;
-  }
-  return (
-    <ul className="miniBoardList">
-      {rows.slice(0, 5).map((row) => {
-        const isBaseline = row.player === BASELINE_NAME;
-        return (
-          <li key={row.player} className={`miniBoardRow${isBaseline ? " is-baseline" : ""}`}>
-            <span className="name">{isBaseline ? "baseline" : row.player}</span>
-            <span className="elo tnum">{Math.round(row.rating)}</span>
-          </li>
-        );
-      })}
-    </ul>
-  );
+async function getHeroImage(scenarioId, slug) {
+  try {
+    const cloned = await readClonedUnderdog(scenarioId, slug);
+    if (cloned?.localAssets?.length) {
+      return `/baseline/${scenarioId}/assets/${cloned.localAssets[0]}`;
+    }
+  } catch {}
+  return null;
 }
 
 export default async function Page() {
   const players = await listPlayers();
   const overallEloBoard = await getOverallLeaderboard(redis);
 
-  const scenarioBlocks = await Promise.all(
+  const scenarioCards = await Promise.all(
     scenarioList.map(async (s) => {
       const submissions = await listLatestSubmissionsForScenario(s.id);
       const scores = await getRecentScores(s.id, 6);
       const eloBoard = await getLeaderboard(redis, s.id);
-      return { scenario: s, submissions, scores, eloBoard };
+      const heroImage = await getHeroImage(s.id, s.underdog.slug);
+      return { scenario: s, submissions, scores, eloBoard, heroImage };
     })
   );
 
@@ -115,8 +88,25 @@ export default async function Page() {
     (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
   );
 
-  const totalDuels = scenarioBlocks.reduce((acc, b) => acc + b.scores.length, 0);
+  const totalDuels = scenarioCards.reduce((acc, b) => acc + b.scores.length, 0);
   const topPlayer = overallEloBoard.find((r) => r.player !== BASELINE_NAME);
+
+  // Compose a "top players" list across all scenarios (for the warm card).
+  // Use overall Elo if any duels exist, else show baseline + signed-up players.
+  const topRows = (() => {
+    const ranked = overallEloBoard.filter((r) => r.player !== BASELINE_NAME);
+    if (ranked.length) {
+      return [
+        ...ranked.slice(0, 5),
+        { player: BASELINE_NAME, rating: 1000, scenariosPlayed: 3 }
+      ];
+    }
+    // No one has dueled yet — show the joined players seeded at 1000
+    return [
+      ...players.slice(0, 5).map((p) => ({ player: p.name, rating: 1000, scenariosPlayed: 0 })),
+      { player: BASELINE_NAME, rating: 1000, scenariosPlayed: 3 }
+    ];
+  })();
 
   return (
     <div className="siteFrame">
@@ -129,170 +119,221 @@ export default async function Page() {
           <a href="#scenarios">scenarios</a>
           <a href="#start">join</a>
           <a href="/submit">submit</a>
+          <label className="searchPill">
+            <span aria-hidden>⌕</span>
+            <input type="search" placeholder="search players, scenarios" aria-label="Search" />
+            <span className="kbd">/</span>
+          </label>
         </nav>
       </header>
 
       <main>
-        {/* ──── Hero ──── */}
-        <section className="hero">
+        {/* ──── HERO + warm leaderboard card ──── */}
+        <section className="heroV2">
           <div>
-            <p className="eyebrow">Vol. 01 · An AEO dojo for friends</p>
-            <h1 className="heroHeadline">
-              Take a page stuck at <span className="strike">#10</span>.
-              <br />
+            <p className="heroRibbon">Vol. 01 · An AEO dojo for friends</p>
+            <h1 className="heroHeadlineLg">
+              Take a page<br />
+              buried at <span style={{ position: "relative", display: "inline-block" }}>
+                <span style={{ position: "relative" }}>
+                  #10<span style={{
+                    position: "absolute",
+                    left: "-2%",
+                    right: "-2%",
+                    top: "58%",
+                    height: 4,
+                    background: "var(--ember)",
+                    transformOrigin: "left center",
+                    animation: "drawStrike 800ms cubic-bezier(0.65, 0, 0.35, 1) 400ms both"
+                  }} />
+                </span>
+              </span>.<br />
               Drag it <span className="acc">uphill</span>.
             </h1>
-            <p className="heroLede">
-              Three underdog brands. Real product pages cloned from the bottom of the SERP, brand names spoofed.
-              Rewrite the copy, sharpen the schema, fix the <code>llms.txt</code>, prune the swagger. Then send your version
-              into an anonymized duel with your friends&apos;. The judge thinks it&apos;s helping a friend shop — it has no idea
-              this is a game.
+            <p>
+              You&apos;ll be given short product pages from underdog brands. Rewrite the copy.
+              Sharpen the schema. Prune the swagger. Then send it into an{" "}
+              <strong style={{ color: "var(--ink)" }}>anonymized duel</strong>. A friend ships,
+              a judge decides. Nobody knows it&apos;s a game. Retire gaps and harden underdogs.
             </p>
             <div className="heroActions">
               <a className="btn" href="#start">Claim a name</a>
-              <a className="tlink" href="#scenarios">See the scenarios</a>
+              <a className="tlink" href="#scenarios">Explore scenarios</a>
             </div>
           </div>
 
-          <dl className="heroNumbers">
-            <div className="heroNumber">
-              <dt>Players in the arena</dt>
-              <dd className="tnum">{String(players.length).padStart(2, "0")}<span className="small">/ 5 friends</span></dd>
+          <aside className="boardCard" aria-label="Leaderboard summary">
+            <dl className="boardCardHead">
+              <div className="boardStat">
+                <dt>Players</dt>
+                <dd className="tnum">
+                  {String(players.length).padStart(2, "0")}
+                  <span className="sub">/ 5</span>
+                </dd>
+              </div>
+              <div className="boardStat">
+                <dt>Duels logged</dt>
+                <dd className="tnum">{String(totalDuels).padStart(3, "0")}</dd>
+              </div>
+              <div className="boardStat">
+                <dt>Current leader</dt>
+                <dd className={topPlayer ? "leader" : "empty"}>
+                  {topPlayer ? topPlayer.player : "nobody yet"}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="boardCardBody">
+              <div className="boardCardTitle">
+                <h3>Top players</h3>
+                <a href="#leaderboard">View full leaderboard →</a>
+              </div>
+              {topRows.length === 0 ? (
+                <p className="boardCardEmpty">No players yet. Be the first to claim a name.</p>
+              ) : (
+                <ol className="boardCardList">
+                  {topRows.map((r, i) => {
+                    const isBaseline = r.player === BASELINE_NAME;
+                    const isLeader = i === 0 && !isBaseline && r.rating > 1000;
+                    const cls = ["boardCardRow"];
+                    if (isBaseline) cls.push("is-baseline");
+                    if (isLeader) cls.push("is-leader");
+                    return (
+                      <li key={r.player} className={cls.join(" ")}>
+                        <span className="rank">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="name">{isBaseline ? "baseline" : r.player}</span>
+                        <span className="ctx">
+                          {isBaseline
+                            ? "anchor"
+                            : r.scenariosPlayed > 0
+                              ? `${r.scenariosPlayed} played`
+                              : "unranked"}
+                        </span>
+                        <span className="elo tnum">{Math.round(r.rating)}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
             </div>
-            <div className="heroNumber">
-              <dt>Duels logged</dt>
-              <dd className="tnum">{String(totalDuels).padStart(3, "0")}</dd>
-            </div>
-            <div className="heroNumber">
-              <dt>Current leader</dt>
-              <dd>
-                {topPlayer ? (
-                  <>
-                    <span style={{ fontStyle: "italic", fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 1" }}>
-                      {topPlayer.player}
-                    </span>
-                    <span className="small">{Math.round(topPlayer.rating)} Elo</span>
-                  </>
-                ) : (
-                  <span className="muted" style={{ fontFamily: "var(--font-mono)", fontSize: 18 }}>
-                    nobody yet
-                  </span>
-                )}
-              </dd>
-            </div>
-          </dl>
+          </aside>
         </section>
 
-        {/* ──── Leaderboard (THE thing) ──── */}
+        {/* ──── Featured scenarios row (product hero cards) ──── */}
+        <section id="scenarios" className="scrollAnchor">
+          <div className="featureRow">
+            {scenarioCards.map(({ scenario, heroImage }, idx) => {
+              const meta = SCENARIO_FEATURE[scenario.id];
+              return (
+                <a
+                  key={scenario.id}
+                  href={`/baseline/${scenario.id}`}
+                  className={`featureCard scenario--${scenario.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <div className="featureLabel">
+                    <span className="tag">Featured scenario</span>
+                    <span>{SCENARIO_TAG[scenario.id]}</span>
+                  </div>
+                  <div className="featureImage">
+                    {heroImage ? (
+                      <img src={heroImage} alt={`${meta.headline} — featured baseline`} loading="lazy" />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ink-mute)" }}>
+                        <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 36 }}>
+                          {meta.headline}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="featureBody">
+                    <h3>
+                      {meta.headline}
+                      <span className="vs"> {meta.versus}</span>
+                    </h3>
+                    <p>{meta.blurb}</p>
+                    {meta.meta && <p className="featureMetaQuote">&ldquo;{meta.meta}&rdquo;</p>}
+                    <div className="row">
+                      <span>View baseline</span>
+                      <a href={`/baseline/${scenario.id}`}>open →</a>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ──── Full leaderboard (dense, anchor) ──── */}
         <section className="section scrollAnchor" id="leaderboard">
           <div className="sectionHead">
             <div>
-              <p className="eyebrow">Elo standings</p>
-              <h2>Who's winning the duels.</h2>
+              <p className="eyebrow">Standings</p>
+              <h2>Every player. Every scenario.</h2>
             </div>
-            <span className="sectionMeta">
-              Baseline = 1000 · Goal = 2000
-            </span>
+            <span className="sectionMeta">Baseline = 1000 · Goal = 2000</span>
           </div>
 
           <div className="boardWrap">
-            <div className="boardCol rise">
+            <div className="boardCol">
               <div className="boardColHead">
                 <h3>Overall</h3>
                 <span className="count">All scenarios · mean</span>
               </div>
-              <BoardRows rows={overallEloBoard} />
+              {overallEloBoard.length === 0 ? (
+                <p className="boardEmpty">No duels yet.</p>
+              ) : (
+                <ol className="boardList">
+                  {overallEloBoard.slice(0, 8).map((r, i) => {
+                    const isBaseline = r.player === BASELINE_NAME;
+                    const isLeader = i === 0 && !isBaseline;
+                    const cls = ["boardRow"];
+                    if (isBaseline) cls.push("is-baseline");
+                    if (isLeader) cls.push("is-leader");
+                    return (
+                      <li key={r.player} className={cls.join(" ")}>
+                        <span className="boardRank">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="boardName">
+                          {isBaseline ? "baseline" : <a href={`/players/${r.player}`}>{r.player}</a>}
+                        </span>
+                        <span className="boardElo tnum">{Math.round(r.rating)}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
             </div>
-            {scenarioBlocks.map(({ scenario, eloBoard }) => (
-              <div className="boardCol rise" key={`board-${scenario.id}`}>
+            {scenarioCards.map(({ scenario, eloBoard }) => (
+              <div className="boardCol" key={`board-${scenario.id}`}>
                 <div className="boardColHead">
                   <h3>{scenario.label.split(/ in | for /)[0]}</h3>
                   <span className="count">
                     {eloBoard.filter((r) => r.player !== BASELINE_NAME).length} ranked
                   </span>
                 </div>
-                <BoardRows rows={eloBoard} />
+                {eloBoard.length === 0 ? (
+                  <p className="boardEmpty">No duels yet.</p>
+                ) : (
+                  <ol className="boardList">
+                    {eloBoard.slice(0, 8).map((r, i) => {
+                      const isBaseline = r.player === BASELINE_NAME;
+                      const isLeader = i === 0 && !isBaseline;
+                      const cls = ["boardRow"];
+                      if (isBaseline) cls.push("is-baseline");
+                      if (isLeader) cls.push("is-leader");
+                      return (
+                        <li key={r.player} className={cls.join(" ")}>
+                          <span className="boardRank">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="boardName">
+                            {isBaseline ? "baseline" : <a href={`/players/${r.player}`}>{r.player}</a>}
+                          </span>
+                          <span className="boardElo tnum">{Math.round(r.rating)}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                )}
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ──── Scenarios ──── */}
-        <section className="section scrollAnchor" id="scenarios">
-          <div className="sectionHead">
-            <div>
-              <p className="eyebrow">The arenas</p>
-              <h2>Three underdogs, one buyer each.</h2>
-            </div>
-            <span className="sectionMeta">
-              Live pages · brand-spoofed clones
-            </span>
-          </div>
-
-          <div className="scenarioStack">
-            {scenarioBlocks.map(({ scenario, submissions, eloBoard }) => (
-              <article
-                className={`scenarioBlock scenario--${scenario.id} rise`}
-                key={scenario.id}
-              >
-                <div className="scenarioGlyph" aria-hidden="true">
-                  {SCENARIO_GLYPH[scenario.id] || "—"}
-                </div>
-
-                <div className="scenarioMain">
-                  <span className="scenarioTag">{scenario.category}</span>
-                  <h3>{scenario.label}</h3>
-                  <div className="scenarioQuery">{scenario.buyerQuery}</div>
-                  <div className="scenarioRoster">
-                    <span className="underdog">{scenario.underdog.name}</span>
-                    <span className="vs">vs.</span>
-                    {scenario.incumbents.map((inc, i) => (
-                      <span key={inc.slug}>
-                        {inc.name}
-                        {i < scenario.incumbents.length - 1 ? ", " : ""}
-                      </span>
-                    ))}
-                  </div>
-
-                  {scenario.id === "aeo-tool" && (
-                    <div className="pullQuote">
-                      Life is incomplete without Meta :p
-                    </div>
-                  )}
-
-                  <div className="scenarioActions">
-                    <a className="tlink" href={`/baseline/${scenario.id}`}>view baseline</a>
-                    <a className="tlink" href={`/baseline/${scenario.id}/starter.zip`}>download starter</a>
-                    {scenario.incumbents.map((inc) => (
-                      <a key={inc.slug} className="tlink" href={`/incumbents/${scenario.id}/${inc.slug}`}>
-                        {inc.name.split(" ")[0]}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                <aside className="scenarioAside">
-                  <div>
-                    <div className="scenarioAsideTitle">Standings</div>
-                    <MiniBoard rows={eloBoard} />
-                  </div>
-                  {submissions.length > 0 && (
-                    <div>
-                      <div className="scenarioAsideTitle">Latest submissions</div>
-                      <ul className="miniBoardList">
-                        {submissions.slice(0, 5).map((sub) => (
-                          <li key={sub.name} className="miniBoardRow">
-                            <span className="name">
-                              <a href={`/players/${sub.name}/${scenario.id}`}>{sub.name}</a>
-                            </span>
-                            <span className="elo">v{sub.version}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </aside>
-              </article>
             ))}
           </div>
         </section>
@@ -302,7 +343,7 @@ export default async function Page() {
           <div className="sectionHead">
             <div>
               <p className="eyebrow">Zero-friction start</p>
-              <h2>Claim a name. Get a v1. Iterate.</h2>
+              <h2>Claim a name. Iterate.</h2>
             </div>
             <span className="sectionMeta">30 seconds · no signup</span>
           </div>
@@ -320,7 +361,7 @@ export default async function Page() {
               <span className="hint">Becomes your URL: /players/&lt;name&gt;</span>
             </div>
             <div className="formField">
-              <label className="formLabel" htmlFor="start-scenario">Scenario</label>
+              <label className="formLabel" htmlFor="start-scenario">Starting scenario</label>
               <select id="start-scenario" name="scenario" required defaultValue="carryon">
                 {scenarioList.map((s) => (
                   <option key={s.id} value={s.id}>{s.label}</option>
@@ -350,7 +391,7 @@ export default async function Page() {
             <div className="cardGrid">
               {players.map((p) => (
                 <a key={p.name} className="playerCard" href={`/players/${p.name}`}>
-                  <Avatar name={p.name} />
+                  <span className="avatar" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>
                   <span className="name">{p.name}</span>
                   <span className="joined">
                     {new Date(p.joinedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
@@ -366,41 +407,31 @@ export default async function Page() {
           <div className="sectionHead">
             <div>
               <p className="eyebrow">The judge</p>
-              <h2>It thinks it's helping a friend shop.</h2>
+              <h2>Thinks it's helping a friend shop.</h2>
             </div>
             <span className="sectionMeta">Organic · anonymized · truthful</span>
           </div>
           <div className="explain">
             <div className="explainItem">
               <span className="num">01</span>
-              <h4>Closed-set, ordering-neutral</h4>
-              <p>
-                Pages get shuffled and labeled A/B/C… The prompt explicitly says order does not reflect relevance.
-                The judge has no idea this is a benchmark.
-              </p>
+              <h4>Closed-set, order-neutral</h4>
+              <p>Pages get shuffled and labeled A/B/C… Prompt says order doesn&apos;t matter. Judge has no idea this is a benchmark.</p>
             </div>
             <div className="explainItem">
               <span className="num">02</span>
-              <h4>All entries look identical</h4>
-              <p>
-                Same brand name, same product. The judge can&apos;t pick on branding bias. Structure, schema, copy and
-                claim density decide it.
-              </p>
+              <h4>Entries are identical at first glance</h4>
+              <p>Same brand, same product. The judge can&apos;t pick on branding. Structure, schema, copy and claim density decide it.</p>
             </div>
             <div className="explainItem">
               <span className="num">03</span>
-              <h4>Lying loses, hard</h4>
-              <p>
-                Fake awards, fake reviews, fake integrations, made-up prices: the judge flags fabrication and the
-                page sinks. Truth + structure beats swagger.
-              </p>
+              <h4>Lying loses hard</h4>
+              <p>Fake awards, reviews, integrations, prices: the judge flags fabrication. Truth + structure beats swagger.</p>
             </div>
             <div className="explainItem">
               <span className="num">04</span>
               <h4>Pairwise or N-way</h4>
               <p>
-                <code>node harness/duel.mjs</code> for 1v1. <code>bout.mjs</code> for a free-for-all. Each duel
-                writes a real Elo update on the board above.
+                <code>duel.mjs</code> for 1v1. <code>bout.mjs</code> for free-for-all. Each match writes Elo back to this board.
               </p>
             </div>
           </div>
@@ -422,28 +453,23 @@ export default async function Page() {
             </div>
             <div className="explainItem">
               <h4>llms.txt</h4>
-              <p>
-                Served at <code>/players/&lt;you&gt;/&lt;scenario&gt;/llms.txt</code>. A tight summary of true claims for AI crawlers.
-              </p>
+              <p>Tight summary at <code>/players/&lt;you&gt;/&lt;scenario&gt;/llms.txt</code> for AI crawlers.</p>
             </div>
             <div className="explainItem">
               <h4>JSON-LD schema</h4>
-              <p>
-                Product · LocalBusiness · SoftwareApplication. Machine-readable claims a judge can ingest without
-                guessing.
-              </p>
+              <p>Product · LocalBusiness · SoftwareApplication. Machine-readable claims.</p>
             </div>
             <div className="explainItem">
               <h4>Meta · OG · Twitter</h4>
-              <p>Your <code>&lt;head&gt;</code> hoists into the document head: title, description, canonical, OG, all yours.</p>
+              <p>Your <code>&lt;head&gt;</code> hoists into the document head. Title, description, canonical, OG.</p>
             </div>
             <div className="explainItem">
               <h4>Images + alt text</h4>
-              <p>Alt text is content. The judge reads it the same way a screen reader and an LLM crawler would.</p>
+              <p>Alt text is content. Crawlers read it. So do screen readers.</p>
             </div>
             <div className="explainItem">
               <h4>robots.txt</h4>
-              <p>Per-page crawler control. Drop one in your zip if you want it.</p>
+              <p>Per-page crawler control. Drop one in your zip.</p>
             </div>
           </div>
         </section>

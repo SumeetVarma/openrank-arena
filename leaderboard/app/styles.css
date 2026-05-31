@@ -1224,8 +1224,397 @@ code, kbd, .mono {
 }
 
 /* ──────────────────────────────────────────────────────────────
-   Small util
+   Reference-style additions: warm rounded card, search pill,
+   product hero cards, watercolor motif
    ────────────────────────────────────────────────────────────── */
+
+/* Search pill in masthead */
+.searchPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink-mute);
+  cursor: text;
+  transition: border-color 160ms ease, background 160ms ease;
+  min-width: 220px;
+}
+.searchPill:focus-within {
+  border-color: var(--ink);
+  background: var(--paper);
+}
+.searchPill input {
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+}
+.searchPill .kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  border-radius: 3px;
+  margin-left: auto;
+  letter-spacing: 0;
+}
+
+/* The big warm rounded leaderboard card — centerpiece of the hero */
+.boardCard {
+  background: linear-gradient(180deg, var(--paper-light) 0%, var(--paper) 100%);
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  padding: var(--s-5) var(--s-6) var(--s-6);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 12px 32px -16px rgba(74, 50, 20, 0.18),
+    0 2px 6px -2px rgba(74, 50, 20, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+.boardCard::after {
+  /* watercolor motif in corner */
+  content: "";
+  position: absolute;
+  right: -20px;
+  bottom: -30px;
+  width: 200px;
+  height: 200px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><filter id='b'><feGaussianBlur stdDeviation='1.2'/></filter></defs><g filter='url(%23b)' opacity='0.5'><circle cx='150' cy='50' r='18' fill='%23c5450c' opacity='0.55'/><path d='M20 140 Q60 80 100 120 T180 130 L180 180 L20 180 Z' fill='%238a5a3a' opacity='0.35'/><path d='M40 150 Q80 100 130 140 T200 150 L200 200 L40 200 Z' fill='%234a5a3d' opacity='0.30'/><path d='M0 160 Q40 130 80 150 T160 160 L160 200 L0 200 Z' fill='%23c5450c' opacity='0.18'/></g></svg>");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.boardCardHead {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: var(--s-4);
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 560px) {
+  .boardCardHead { grid-template-columns: 1fr 1fr; }
+  .boardCardHead .boardStat:last-child { grid-column: span 2; }
+}
+.boardStat dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  margin-bottom: 4px;
+}
+.boardStat dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(32px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  color: var(--ink);
+}
+.boardStat dd .sub {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0;
+  margin-left: 6px;
+  vertical-align: 6px;
+}
+.boardStat dd.leader {
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  color: var(--ember);
+  font-size: clamp(24px, 2.6vw, 36px);
+}
+.boardStat dd.empty {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+.boardCardBody {
+  position: relative;
+  z-index: 2;
+}
+.boardCardTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--s-3);
+}
+.boardCardTitle h3 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+.boardCardTitle a {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ember);
+  border-bottom: 1px solid var(--ember-soft);
+  padding-bottom: 1px;
+}
+.boardCardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1px;
+}
+.boardCardRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px dotted var(--rule-soft);
+}
+.boardCardRow:last-child { border-bottom: none; }
+.boardCardRow .rank {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: -0.02em;
+}
+.boardCardRow .name {
+  font-weight: 500;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.boardCardRow .ctx {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.boardCardRow .elo {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: var(--ink);
+  min-width: 48px;
+  text-align: right;
+}
+.boardCardRow.is-baseline .name,
+.boardCardRow.is-baseline .elo,
+.boardCardRow.is-baseline .rank,
+.boardCardRow.is-baseline .ctx {
+  color: var(--ink-mute);
+  font-style: italic;
+}
+.boardCardRow.is-leader { background: rgba(245, 216, 196, 0.35); margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 4px; }
+.boardCardRow.is-leader .name { color: var(--ember-deep); }
+.boardCardRow.is-leader .elo { color: var(--ember); }
+.boardCardEmpty {
+  font-size: 13px;
+  color: var(--ink-mute);
+  font-style: italic;
+  padding: var(--s-3) 0;
+}
+
+/* Hero panel updated: ribbon for "VOL 01" */
+.heroRibbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ember);
+  margin-bottom: var(--s-4);
+}
+.heroRibbon::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--ember);
+}
+
+/* PRODUCT HERO CARDS — scenario showcase */
+.featureRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+  margin-top: var(--s-7);
+}
+@media (max-width: 880px) {
+  .featureRow { grid-template-columns: 1fr; }
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 8px 24px -16px rgba(74, 50, 20, 0.12);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+}
+.featureCard:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 16px 32px -18px rgba(74, 50, 20, 0.20),
+    0 4px 8px -2px rgba(74, 50, 20, 0.08);
+}
+
+.featureLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.featureLabel .tag {
+  color: var(--ember);
+  font-weight: 500;
+}
+
+.featureImage {
+  aspect-ratio: 4 / 3;
+  background: var(--paper-deep);
+  overflow: hidden;
+  position: relative;
+}
+.featureImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.featureCard:hover .featureImage img { transform: scale(1.04); }
+
+.featureBody {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.featureBody h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+}
+.featureBody h3 .vs {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  font-weight: 400;
+  margin-left: 4px;
+}
+.featureBody p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.featureBody .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px dotted var(--rule);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+}
+.featureBody .row a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink-mute);
+  padding-bottom: 1px;
+}
+.featureBody .row a:hover { color: var(--ember); border-color: var(--ember); }
+
+.featureMetaQuote {
+  margin: 0;
+  padding: 8px 0 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--plum);
+  line-height: 1.4;
+  font-variation-settings: "opsz" 48, "SOFT" 100, "WONK" 1;
+}
+
+/* HERO grid revised: text + warm card side by side */
+.heroV2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: var(--s-7);
+  align-items: end;
+  padding-top: var(--s-5);
+}
+@media (max-width: 880px) {
+  .heroV2 { grid-template-columns: 1fr; gap: var(--s-5); }
+}
+
+.heroV2 .heroHeadlineLg {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(40px, 6.5vw, 84px);
+  line-height: 0.94;
+  letter-spacing: -0.028em;
+  font-variation-settings: "opsz" 144, "SOFT" 20;
+  margin-bottom: var(--s-4);
+}
+.heroV2 .heroHeadlineLg .acc {
+  font-style: italic;
+  color: var(--ember);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+.heroV2 p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 52ch;
+  margin-bottom: var(--s-5);
+}
+
+/* Small util */
 .center { text-align: center; }
 .muted  { color: var(--ink-mute); }
 .tnum   { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
