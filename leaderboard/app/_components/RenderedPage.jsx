@@ -29,13 +29,42 @@ export function RenderedTopBar({ scenario, kind, name, version, extra }) {
   );
 }
 
+// Scrub any leaked original-brand domains from JSON-LD before rendering.
+// The cloned source pages carry JSON-LD with the original site's URLs in
+// fields like @id, url, image, sameAs, contentUrl, logo — those signals must
+// not point at the original brand or the page leaks provenance.
+const LEAK_DOMAIN_REGEX = new RegExp(
+  [
+    "https?:\\/\\/(?:www\\.)?topodesigns\\.com",
+    "https?:\\/\\/(?:www\\.)?tortugabackpacks\\.com",
+    "https?:\\/\\/(?:www\\.)?nomatic\\.com",
+    "https?:\\/\\/(?:www\\.)?rankscale\\.ai",
+    "https?:\\/\\/(?:www\\.)?tryprofound\\.com",
+    "https?:\\/\\/(?:www\\.)?usehall\\.com",
+    "https?:\\/\\/(?:www\\.)?brightedge\\.com",
+    "https?:\\/\\/(?:www\\.)?magnoliadentistryatx\\.com",
+    "https?:\\/\\/(?:www\\.)?blunncreekdental\\.com",
+    "https?:\\/\\/(?:www\\.)?nwaustinfamilydentistry\\.com",
+    "https?:\\/\\/(?:www\\.)?brobergfamilydental\\.com",
+    "https?:\\/\\/(?:www\\.)?mmfamilydentistry\\.com"
+  ].join("|"),
+  "gi"
+);
+
+function scrubJsonLdBlock(raw) {
+  if (!raw) return raw;
+  // Strip URLs that point to known original-brand domains. Replace with a
+  // neutral arena URL placeholder so downstream parsers still get a valid URL.
+  return raw.replace(LEAK_DOMAIN_REGEX, "https://openrank-arena.vercel.app");
+}
+
 export function RenderedJsonLd({ blocks }) {
   if (!blocks?.length) return null;
   return blocks.map((b, i) => (
     <script
       key={i}
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: b }}
+      dangerouslySetInnerHTML={{ __html: scrubJsonLdBlock(b) }}
     />
   ));
 }

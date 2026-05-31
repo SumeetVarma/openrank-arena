@@ -134,22 +134,28 @@ function buildNextMetadata(meta, { name, scenario }) {
   const title = meta.title || `${name} — ${scenario.label}`;
   const description = meta.description || `${name}'s submission for the ${scenario.label} scenario.`;
 
-  const next = { title, description };
+  // The arena owns identity for this URL — never let player-supplied canonical
+  // or og:url point at an external domain. Constrain to the arena path.
+  const arenaCanonical = `/players/${name}/${scenario.id}`;
+  const arenaUrl = `https://openrank-arena.vercel.app${arenaCanonical}`;
+
+  const next = { title, description, alternates: { canonical: arenaCanonical } };
 
   if (meta.keywords) next.keywords = meta.keywords;
   if (meta.robots) next.robots = meta.robots;
   if (meta.authors || meta.author) next.authors = [{ name: meta.author }];
-  if (meta.canonical) next.alternates = { canonical: meta.canonical };
 
   const og = meta.og || {};
   if (og.title || og.description || og.image || og.url) {
+    // Only keep og:image if it's a same-origin or arena-hosted URL.
+    const safeImage = og.image && /^(https?:\/\/openrank-arena\.vercel\.app|\/)/.test(og.image) ? og.image : null;
     next.openGraph = {
       title: og.title || title,
       description: og.description || description,
-      url: og.url || undefined,
-      siteName: og.siteName || undefined,
+      url: arenaUrl,
+      siteName: "OpenRank Arena",
       type: og.type || "website",
-      images: og.image ? [{ url: og.image }] : undefined
+      images: safeImage ? [{ url: safeImage }] : undefined
     };
   }
 
