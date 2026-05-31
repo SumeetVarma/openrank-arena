@@ -130,27 +130,12 @@ export default async function Page() {
         {/* ──── HERO + warm leaderboard card ──── */}
         <section className="heroV2">
           <div>
-            <p className="heroRibbon">Vol. 01 · An AEO dojo for friends</p>
             <h1 className="heroHeadlineLg">
-              Take a page<br />
-              buried at <span style={{ position: "relative", display: "inline-block" }}>
-                <span style={{ position: "relative" }}>
-                  #10<span style={{
-                    position: "absolute",
-                    left: "-2%",
-                    right: "-2%",
-                    top: "58%",
-                    height: 4,
-                    background: "var(--ember)",
-                    transformOrigin: "left center",
-                    animation: "drawStrike 800ms cubic-bezier(0.65, 0, 0.35, 1) 400ms both"
-                  }} />
-                </span>
-              </span>.<br />
-              Drag it <span className="acc">uphill</span>.
+              Beat the page<br />
+              ranked <span className="acc">#10</span>.
             </h1>
             <p>
-              Three underdog pages. Three categories. Rewrite, restructure, tune the schema. Upload your version. The judge picks the more credible one of every pair. Elo updates. Climb.
+              An AEO benchmark. Three underdog pages, three categories. Edit one. Upload. A judge picks the better version. Climb the board.
             </p>
             <div className="heroActions">
               <a className="btn" href="/submit">Submit your page</a>

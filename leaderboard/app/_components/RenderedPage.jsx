@@ -55,26 +55,32 @@ function Specs({ specs, extraSpecs = [] }) {
   );
 }
 
-function Sections({ sections, sectionLabel = "About" }) {
+function Sections({ sections }) {
   if (!sections?.length) return null;
-  return sections.map((sec, i) => (
-    <section className="productSection" key={`sec-${i}`}>
-      <div className="productSectionLabel">{sec.heading ? sectionLabel : "Detail"}</div>
-      <div className="productSectionBody">
-        {sec.heading && <h2>{sec.heading}</h2>}
-        {sec.paragraphs.map((p, pi) => (
-          <p key={pi}>{p}</p>
-        ))}
-        {sec.listItems.length > 0 && (
-          <ul style={{ marginTop: 16 }}>
-            {sec.listItems.map((li, li2) => (
-              <li key={li2}>{li}</li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </section>
-  ));
+  // Render the section number as the left-column label ("§ 01", "§ 02"…)
+  // — that way every section gets a unique-feeling rail label instead of
+  // repeating "Product / Product / Product".
+  return sections.map((sec, i) => {
+    const num = String(i + 1).padStart(2, "0");
+    return (
+      <section className="productSection" key={`sec-${i}`}>
+        <div className="productSectionLabel">§ {num}</div>
+        <div className="productSectionBody">
+          {sec.heading && <h2>{sec.heading}</h2>}
+          {sec.paragraphs.map((p, pi) => (
+            <p key={pi}>{p}</p>
+          ))}
+          {sec.listItems.length > 0 && (
+            <ul style={{ marginTop: 16 }}>
+              {sec.listItems.map((li, li2) => (
+                <li key={li2}>{li}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    );
+  });
 }
 
 function Gallery({ images, brandName }) {

@@ -91,52 +91,45 @@ export function extractCloned(fullHtml, { brandName, kind, localAssets = [] }) {
   }
 
   // ── Image gallery ──
-  // The clone script downloads up to 8 product images. The original page's
-  // <img> tags often point to absolute CDN URLs that we couldn't successfully
-  // remap, so we fall back to listing the local assets/ directory directly.
+  // The clone script downloads up to 8 product images, named image-1.jpg etc.
+  // The original page's <img> tags consistently point at unreachable absolute
+  // CDN URLs we couldn't remap, so we always use the filesystem listing.
   const images = [];
-  const seen = new Set();
-  // Try cloned <img> refs first
-  $("img").each((_, el) => {
-    const src = ($(el).attr("src") || "").trim();
-    const alt = ($(el).attr("alt") || "").trim();
-    if (!src || seen.has(src)) return;
-    const isLocal =
-      src.startsWith("assets/") ||
-      src.startsWith("./assets/") ||
-      src.startsWith("/baseline/") ||
-      src.startsWith("/incumbents/");
-    if (!isLocal) return;
-    seen.add(src);
-    images.push({ src: src.replace(/^\.\//, ""), alt: alt || brandName });
-  });
-  // Fall back to filesystem-listed assets if nothing was extracted from <img>
-  if (images.length === 0 && localAssets.length > 0) {
-    // Also try to collect alt-text candidates from page meta + JSON-LD,
-    // applying generic anonymization (some clones leak original brand names in alts).
+  if (localAssets.length > 0) {
+    // Gather candidate alt texts from meta + JSON-LD + page <img> alts.
+    // Apply aggressive anonymization for any leaked original-brand strings.
     const fallbackAlts = [];
     const ogImageAlt = pickMeta($, "property", "og:image:alt");
     if (ogImageAlt) fallbackAlts.push(ogImageAlt);
-    // Also try alt-only <img> tags (no src, but Topo Shopify has these)
     $("img[alt]").each((_, el) => {
       const alt = ($(el).attr("alt") || "").trim();
       if (alt && alt !== brandName && !fallbackAlts.includes(alt) && alt.length < 120) {
         fallbackAlts.push(alt);
       }
     });
-    // Anonymize alt text — strip any leaked original-brand mentions.
-    // We don't know the original brand here, but we can keep alts that don't
-    // mention any obvious brand-looking proper noun. For safety, replace alts
-    // that mention common cloned brands (Topo, Tortuga, Nomatic, Magnolia,
-    // Blunn, Northwest, Broberg, Rankscale, Profound, Hall) with the spoof.
-    const REAL_BRANDS_RE = /(topo designs|topo|tortuga|nomatic|magnolia|blunn creek|northwest austin|broberg|rankscale|profound|hall ai|usehall)/i;
-    const anonAlts = fallbackAlts.map((a) => (REAL_BRANDS_RE.test(a) ? a.replace(REAL_BRANDS_RE, brandName) : a));
+    // Strip / anonymize any known original-brand names plus common leaked names
+    const REAL_BRANDS_RE = new RegExp(
+      [
+        "topo designs", "topo", "tortuga", "nomatic", "magnolia",
+        "blunn creek", "northwest austin", "broberg", "rankscale",
+        "profound", "hall ai", "usehall",
+        // People names that leaked from dental clones
+        "dr\\.?\\s+(molly|mary|kunjumary|rajashree|sana|eric|alex)\\s+\\S+",
+        "molly burton", "mary kalathu", "kunjumary",
+        // SVG logo brand names that leak in AEO clones
+        "bosch", "iberdrola", "o2", "otto group", "stepstone", "ubs", "hama",
+        "ahrefs", "semrush", "surfer seo"
+      ].join("|"),
+      "gi"
+    );
+    const cleanAlt = (a) => a.replace(REAL_BRANDS_RE, brandName).trim();
+    const anonAlts = fallbackAlts.map(cleanAlt);
     for (const fname of localAssets) {
       const src = `assets/${fname}`;
-      images.push({
-        src,
-        alt: anonAlts.shift() || `${brandName} — product photo`
-      });
+      let alt = anonAlts.shift() || `${brandName} — featured image`;
+      // Skip duplicate of brand name only
+      if (alt === brandName) alt = `${brandName} — featured image`;
+      images.push({ src, alt });
     }
   }
 
@@ -177,12 +170,15 @@ export function extractCloned(fullHtml, { brandName, kind, localAssets = [] }) {
     if (tag === "li") {
       if (text.length < 6 || text.length > 240) return;
       if (/^(home|shop|menu|cart|account|sign|©)/i.test(text)) return;
+      // Some clones produce "1Foo" / "2Bar" — counters glued to text.
+      // Strip the leading digit prefix.
+      const cleaned = text.replace(/^\d+(?=[A-Z])/, "").trim();
       if (!current) {
         current = { heading: null, paragraphs: [], listItems: [] };
         sections.push(current);
       }
-      if (!current.listItems.some((l) => l === text)) {
-        current.listItems.push(text);
+      if (!current.listItems.some((l) => l === cleaned)) {
+        current.listItems.push(cleaned);
       }
       return;
     }
