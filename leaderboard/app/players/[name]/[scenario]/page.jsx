@@ -145,10 +145,15 @@ function buildNextMetadata(meta, { name, scenario }) {
   if (meta.robots) next.robots = meta.robots;
   if (meta.authors || meta.author) next.authors = [{ name: meta.author }];
 
+  // Strict same-origin check: only the arena's https origin or root-relative
+  // paths that DON'T start with `//` (protocol-relative URLs are external).
+  const isArenaUrl = (u) =>
+    typeof u === "string" &&
+    (/^https:\/\/openrank-arena\.vercel\.app(?:\/|$)/.test(u) || /^\/(?!\/)/.test(u));
+
   const og = meta.og || {};
   if (og.title || og.description || og.image || og.url) {
-    // Only keep og:image if it's a same-origin or arena-hosted URL.
-    const safeImage = og.image && /^(https?:\/\/openrank-arena\.vercel\.app|\/)/.test(og.image) ? og.image : null;
+    const safeImage = isArenaUrl(og.image) ? og.image : null;
     next.openGraph = {
       title: og.title || title,
       description: og.description || description,
@@ -161,8 +166,7 @@ function buildNextMetadata(meta, { name, scenario }) {
 
   const tw = meta.twitter || {};
   if (tw.card || tw.title || tw.description || tw.image) {
-    // Same rule as og:image — only keep twitter:image if same-origin or arena-hosted.
-    const safeTwImage = tw.image && /^(https?:\/\/openrank-arena\.vercel\.app|\/)/.test(tw.image) ? tw.image : null;
+    const safeTwImage = isArenaUrl(tw.image) ? tw.image : null;
     next.twitter = {
       card: tw.card || "summary",
       title: tw.title || title,
