@@ -19,11 +19,13 @@ export async function generateMetadata({ params }) {
   const scenario = getScenario(scenarioId);
   if (!scenario) return {};
   const cloned = await readClonedUnderdog(scenarioId, scenario.underdog.slug);
+  const canonicalPath = `/baseline/${scenarioId}`;
   if (cloned) {
     const m = metaFromCloned(cloned.html);
     return {
       title: cleanTitle(m.title, scenario.underdog.name) || `${scenario.underdog.name} — ${scenario.label}`,
       description: m.description || `Baseline page for ${scenario.underdog.name}.`,
+      alternates: { canonical: canonicalPath },
       openGraph: m.openGraph,
       twitter: m.twitter,
       keywords: m.keywords
@@ -32,7 +34,8 @@ export async function generateMetadata({ params }) {
   const c = scenario.underdog;
   return {
     title: `${c.name} — ${scenario.label}`,
-    description: `Baseline page for ${c.name}, the underdog in the ${scenario.label} arena scenario.`
+    description: `Baseline page for ${c.name}, the underdog in the ${scenario.label} arena scenario.`,
+    alternates: { canonical: canonicalPath }
   };
 }
 

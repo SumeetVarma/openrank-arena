@@ -19,12 +19,14 @@ export async function generateMetadata({ params }) {
   const scenario = getScenario(scenarioId);
   const candidate = scenario && getCandidate(scenarioId, slug);
   if (!candidate) return {};
+  const canonicalPath = `/incumbents/${scenarioId}/${slug}`;
   const cloned = await readClonedIncumbent(scenarioId, slug);
   if (cloned) {
     const m = metaFromCloned(cloned.html);
     return {
       title: cleanTitle(m.title, candidate.name) || `${candidate.name} — ${scenario.label}`,
       description: m.description,
+      alternates: { canonical: canonicalPath },
       openGraph: m.openGraph,
       twitter: m.twitter,
       keywords: m.keywords
@@ -32,7 +34,8 @@ export async function generateMetadata({ params }) {
   }
   return {
     title: `${candidate.name} — ${scenario.label}`,
-    description: `Incumbent page for ${candidate.name} in the ${scenario.label} arena scenario.`
+    description: `Incumbent page for ${candidate.name} in the ${scenario.label} arena scenario.`,
+    alternates: { canonical: canonicalPath }
   };
 }
 

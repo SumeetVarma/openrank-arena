@@ -237,18 +237,41 @@ export function metaFromCloned(fullHtml) {
     }
     return null;
   };
+  // Original-brand domains we must NOT leak in og:url / og:image / twitter:image.
+  // If a cloned meta tag points at one of these, strip the URL.
+  const LEAK_DOMAINS = [
+    "topodesigns.com",
+    "tortugabackpacks.com",
+    "nomatic.com",
+    "rankscale.ai",
+    "tryprofound.com",
+    "usehall.com",
+    "brightedge.com",
+    "magnoliadentistryatx.com",
+    "blunncreekdental.com",
+    "nwaustinfamilydentistry.com",
+    "brobergfamilydental.com",
+    "mmfamilydentistry.com"
+  ];
+  const isLeak = (url) => {
+    if (!url) return false;
+    return LEAK_DOMAINS.some((d) => url.toLowerCase().includes(d));
+  };
+
   const desc = get("name", "description");
   if (desc) out.description = desc;
   const keywords = get("name", "keywords");
   if (keywords) out.keywords = keywords;
   const ogTitle = get("property", "og:title");
   const ogDesc = get("property", "og:description");
-  const ogImage = get("property", "og:image");
-  const ogUrl = get("property", "og:url");
+  const rawOgImage = get("property", "og:image");
+  const rawOgUrl = get("property", "og:url");
   const ogType = get("property", "og:type");
+  // Strip any URL that leaks to the original brand domain
+  const ogImage = isLeak(rawOgImage) ? null : rawOgImage;
+  const ogUrl = isLeak(rawOgUrl) ? null : rawOgUrl;
+
   if (ogTitle || ogDesc || ogImage) {
-    // Next.js Metadata API only accepts a fixed set of og:type values.
-    // Coerce anything outside that set to "website".
     const ALLOWED_OG_TYPES = new Set([
       "website", "article", "book", "profile",
       "music.song", "music.album", "music.playlist", "music.radio_station",
@@ -266,7 +289,8 @@ export function metaFromCloned(fullHtml) {
   const twCard = get("name", "twitter:card");
   const twTitle = get("name", "twitter:title");
   const twDesc = get("name", "twitter:description");
-  const twImage = get("name", "twitter:image");
+  const rawTwImage = get("name", "twitter:image");
+  const twImage = isLeak(rawTwImage) ? null : rawTwImage;
   if (twCard || twTitle || twDesc || twImage) {
     out.twitter = {
       card: twCard || "summary",

@@ -184,17 +184,18 @@ export default async function Page() {
       <main>
         {/* ── 1. HERO — compact ── */}
         <section className="heroFinal">
-          <p className="heroFinalEyebrow">An AEO benchmark · Anonymized matches · Real Elo</p>
+          <p className="heroFinalEyebrow">An AEO benchmark</p>
           <h1 className="heroFinalHead">
             Beat the page<br />
             ranked <span className="acc">#10</span>.
           </h1>
           <p className="heroFinalLede">
-            You vs. four friends vs. a judge that can&apos;t see your name.
+            Pick one of three underdog pages. Rewrite it. Upload your zip. A blind judge compares your
+            version against your friends&apos; — Elo updates land on the board.
           </p>
           <div className="heroFinalActions">
             <a className="btn" href="#submit">Submit your page</a>
-            <a className="tlink" href="#scenarios">See scenarios</a>
+            <a className="tlink" href="#leaderboard">View leaderboard</a>
           </div>
         </section>
 
@@ -202,28 +203,28 @@ export default async function Page() {
         <section className="whyBlock">
           <div className="whyGrid">
             <div className="whyCol">
-              <p className="whyEyebrow">The game</p>
+              <p className="whyEyebrow">What this is</p>
               <p className="whyText">
-                <strong>AEO is the AEO of post-Google.</strong> When ChatGPT, Perplexity, and Claude answer
-                a buyer&apos;s question, only a few pages get cited. The art of getting cited — clear copy,
-                tight schema, honest claims — is <em>Answer Engine Optimization</em>. This is a closed
-                gym to practice it.
+                When ChatGPT, Perplexity, or Claude answer a buyer&apos;s question, only a few pages get
+                cited. <strong>Answer Engine Optimization</strong> is the practice of being one of them.
+                This is a benchmark for it — three real underdog pages, head-to-head against your friends&apos;
+                rewrites, scored by an LLM judge.
               </p>
             </div>
             <div className="whyCol">
-              <p className="whyEyebrow">Why these three scenarios</p>
+              <p className="whyEyebrow">Why three scenarios</p>
               <p className="whyText">
-                A consumer product, a local service, and a B2B SaaS — three categories with very
-                different buyer logic. Optimizing across all three means you&apos;ve built generalizable
-                AEO chops, not just a copywriting trick that works on backpacks.
+                A consumer product, a local service, and a B2B SaaS. Three categories with different buyer
+                intent and AEO levers. A winning playbook should generalize across all three — not just
+                work on one.
               </p>
             </div>
             <div className="whyCol">
               <p className="whyEyebrow">Why anonymized</p>
               <p className="whyText">
-                The judge never sees your name, never knows it&apos;s a benchmark. It thinks it&apos;s helping
-                a friend shop. Pages compete on what crawlers and buyers actually read — structure,
-                claims, evidence — not on who wrote them.
+                The judge never sees your name and never knows it&apos;s a benchmark. It thinks it&apos;s
+                helping a friend shop. Pages compete on what crawlers and buyers actually read —
+                structure, claims, evidence.
               </p>
             </div>
           </div>
@@ -312,9 +313,12 @@ export default async function Page() {
                     <p className="featureBuyer">
                       &ldquo;{scenario.buyerQuery.length > 95 ? scenario.buyerQuery.slice(0, 95) + "…" : scenario.buyerQuery}&rdquo;
                     </p>
-                    {scenario.id === "aeo-tool" && (
-                      <p className="featureMetaQuote">&ldquo;Life is incomplete without Meta :p&rdquo;</p>
-                    )}
+                    <div className="featureActions">
+                      <span className="tlink" style={{ pointerEvents: "none" }}>View baseline →</span>
+                      <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-mute)" }}>
+                        starter.zip available
+                      </span>
+                    </div>
                   </div>
                 </a>
               );
@@ -360,8 +364,9 @@ export default async function Page() {
                 <h3>Anyone runs a match</h3>
                 <p>
                   Any player can run <code>match.mjs</code> from the CLI. The judge sees two or more anonymized
-                  versions side by side with the real market for context. It picks the most credible page.
-                  Fabricate and the judge sniffs it — your page sinks.
+                  versions side by side with the real market for context, then picks the most credible page.
+                  Fabricated claims (fake reviews, fake awards, fake prices) get flagged and the page sinks
+                  in the ranking.
                 </p>
               </div>
             </li>

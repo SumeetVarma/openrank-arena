@@ -2384,10 +2384,19 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   font-size: 14px;
   line-height: 1.5;
   color: var(--ink-soft);
-  margin: 0;
+  margin: 0 0 var(--s-3);
   font-variation-settings: "opsz" 48, "SOFT" 80, "WONK" 0;
   border-left: 2px solid var(--ember-soft);
   padding-left: 10px;
+}
+.featureActions {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+  margin-top: auto;
+  padding-top: var(--s-3);
+  border-top: 1px dotted var(--rule);
+  flex-wrap: wrap;
 }
 
 /* How it works steps */
