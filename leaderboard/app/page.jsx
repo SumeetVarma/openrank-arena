@@ -19,6 +19,7 @@ import Leaderboard from "./_components/Leaderboard.jsx";
 import PromptTabs from "./_components/PromptTabs.jsx";
 import CountUp from "./_components/CountUp.jsx";
 import LivePulse from "./_components/LivePulse.jsx";
+import JudgePromptViewer from "./_components/JudgePromptViewer.jsx";
 
 const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 const redis = HAS_KV
@@ -232,7 +233,8 @@ export default async function Page() {
           <LivePulse lastEventAt={lastEventAt} />
           <a href="#leaderboard">Leaderboard</a>
           <a href="#scenarios">Scenarios</a>
-          <a href="#submit">How to play</a>
+          <a href="#judge">Judge prompt</a>
+          <a href="#feedback">Notes</a>
           <a className="btn btn--sm" href="#submit" style={{ marginLeft: 8 }}>Submit</a>
         </nav>
       </header>
@@ -470,6 +472,81 @@ node harness/submit.mjs \\
                 No terminal? <a className="tlink" href="/submit" style={{ color: "var(--ember-soft)", borderColor: "var(--ember-soft)" }}>Upload a zip in the browser →</a>
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* ── 6. JUDGE PROMPT — what the LLM actually reads ── */}
+        <section className="section scrollAnchor" id="judge">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">Transparency</p>
+              <h2>What the judge sees</h2>
+            </div>
+            <span className="sectionMeta">tab through scenarios · prompt template is identical across all matches</span>
+          </div>
+          <JudgePromptViewer scenarios={scenarioList.map((s) => ({
+            id: s.id,
+            shortLabel: s.shortLabel,
+            buyerQuery: s.buyerQuery
+          }))} />
+        </section>
+
+        {/* ── 7. FEEDBACK + SCENARIO REQUESTS ── */}
+        <section className="section scrollAnchor" id="feedback">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">From the floor</p>
+              <h2>Notes &amp; scenario requests</h2>
+            </div>
+            <span className="sectionMeta">{feedbackRows.length} note{feedbackRows.length === 1 ? "" : "s"}</span>
+          </div>
+
+          <div className="feedbackGrid">
+            <div className="feedbackList">
+              {feedbackRows.length === 0 ? (
+                <div className="feedbackEmpty">
+                  <p>No notes yet. Be the first to drop one.</p>
+                </div>
+              ) : (
+                <ul className="feedbackItems">
+                  {feedbackRows.map((f, i) => (
+                    <li className="feedbackItem" key={`fb-${i}`}>
+                      <header className="feedbackHead">
+                        <span className="feedbackName">{f.name || "Anonymous"}</span>
+                        <span className="feedbackWhen">{relTime(f.createdAt)}</span>
+                      </header>
+                      <p className="feedbackBody">{f.message}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <aside className="feedbackForm">
+              <p className="feedbackFormTitle">Want a new scenario? Got a take?</p>
+              <p className="feedbackFormSub">
+                Suggest a category we should add (legal services? coffee subscription?
+                vibe-coding tools?), call out something that doesn&apos;t work, or just
+                say what you tried. Everyone sees it.
+              </p>
+              <form action="/api/feedback" method="post">
+                <label className="formField">
+                  <span className="formLabel">Your name</span>
+                  <input name="name" placeholder="alice, bob, sumeet…" maxLength={80} autoComplete="off" />
+                </label>
+                <label className="formField">
+                  <span className="formLabel">Note</span>
+                  <textarea
+                    name="message"
+                    required
+                    rows={4}
+                    maxLength={2000}
+                    placeholder="Suggest a new scenario, report a bug, or share a tactic that worked…"
+                  />
+                </label>
+                <button className="btn" type="submit">Post note</button>
+              </form>
+            </aside>
           </div>
         </section>
 
