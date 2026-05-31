@@ -16,6 +16,7 @@ import {
 } from "../lib/elo.mjs";
 import { readClonedUnderdog } from "../lib/clonedBaseline.mjs";
 import Leaderboard from "./_components/Leaderboard.jsx";
+import PromptTabs from "./_components/PromptTabs.jsx";
 
 const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 const redis = HAS_KV
@@ -50,6 +51,11 @@ async function getFeedbackRows() {
 }
 
 async function getHeroImage(scenarioId, slug) {
+  // Curated, leak-safe hero images per scenario. The cloned source images for
+  // dental + aeo-tool would expose original brand identity; carry-on's cloned
+  // asset is the underdog backpack itself, which is fine.
+  if (scenarioId === "dental") return "/scenarios/dental.jpg";
+  if (scenarioId === "aeo-tool") return "/scenarios/openrank.jpg";
   try {
     const cloned = await readClonedUnderdog(scenarioId, slug);
     if (cloned?.localAssets?.length) {
@@ -165,6 +171,42 @@ export default async function Page() {
   const topPlayer = [...rows].sort((a, b) => b.overall - a.overall)[0];
   const totalMatches = recentActivity.filter((e) => e.kind !== "submission").length;
 
+  const recentSubmissions = recentActivity.filter((e) => e.kind === "submission");
+  const recentActivityBlock = recentSubmissions.length > 0 ? (
+    <section className="section">
+      <div className="sectionHead">
+        <div>
+          <p className="eyebrow">Activity</p>
+          <h2>Recent submissions</h2>
+        </div>
+        <span className="sectionMeta">{recentSubmissions.length} upload{recentSubmissions.length === 1 ? "" : "s"} · click to view the page</span>
+      </div>
+      <ul className="activityFeed">
+        {recentSubmissions.map((e, i) => {
+          const scenario = scenarioList.find((s) => s.id === e.scenarioId);
+          const when = relTime(e.ranAt || e.uploadedAt);
+          const href = `/players/${e.name}/${e.scenarioId}`;
+          return (
+            <li className="activityItem activityItem--link" key={`a${i}`}>
+              <a className="activityRowLink" href={href} aria-label={`${e.name}'s ${scenario?.shortLabel} v${e.version}`}>
+                <span className="activityWho">{e.name}</span>
+                <span className="activityVerb">uploaded</span>
+                <span className="activityWhat">
+                  {scenario?.shortLabel} <span className="mono" style={{ color: "var(--ink-mute)" }}>v{e.version}</span>
+                </span>
+                {e.note && (
+                  <span className="activityNote">&ldquo;{e.note.length > 70 ? e.note.slice(0, 70) + "…" : e.note}&rdquo;</span>
+                )}
+                <span className="activityWhen">{when}</span>
+                <span className="activityArrow" aria-hidden>→</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  ) : null;
+
 
   return (
     <div className="siteFrame">
@@ -182,39 +224,44 @@ export default async function Page() {
       </header>
 
       <main>
-        {/* ── 1. HERO — compact ── */}
-        <section className="heroFinal">
-          <p className="heroFinalEyebrow">An AEO benchmark</p>
-          <h1 className="heroFinalHead">
-            Beat the page<br />
-            ranked <span className="acc">#10</span>.
-          </h1>
-          <p className="heroFinalLede">
-            Pick one of three underdog pages. Rewrite it. Upload your zip. A blind judge compares your
-            version against your friends&apos; — Elo updates land on the board.
-          </p>
-          <div className="heroFinalActions">
-            <a className="btn" href="#submit">Submit your page</a>
-            <a className="tlink" href="#leaderboard">View leaderboard</a>
+        {/* ── 1. HERO — two-column with live preview ── */}
+        <section className="heroSplit">
+          <div className="heroSplitLeft">
+            <p className="heroFinalEyebrow">An AEO benchmark</p>
+            <h1 className="heroFinalHead">
+              Beat the page<br />
+              ranked <span className="acc">#10</span>.
+            </h1>
+            <p className="heroFinalLede">
+              ChatGPT and Claude only cite a few pages when they answer buyer questions.
+              <strong> AEO is the work of becoming one of them.</strong>
+            </p>
+            <p className="heroFinalLede" style={{ marginTop: 0 }}>
+              Pick one of three underdog pages. Rewrite it. Upload your zip. A blind judge compares
+              your version against your friends&apos; — Elo updates land on the board.
+            </p>
+            <div className="heroFinalActions">
+              <a className="btn" href="#submit">Submit your page</a>
+              <a className="tlink" href="#leaderboard">View leaderboard</a>
+            </div>
+            <dl className="heroStats">
+              <div>
+                <dt>Players</dt>
+                <dd className="tnum">{players.length}</dd>
+              </div>
+              <div>
+                <dt>Matches run</dt>
+                <dd className="tnum">{totalMatches}</dd>
+              </div>
+              <div>
+                <dt>Top Elo</dt>
+                <dd className="tnum">{topPlayer ? Math.round(topPlayer.overall) : 1000}</dd>
+              </div>
+            </dl>
           </div>
-        </section>
 
-        {/* ── 1.5 WHY ── */}
-        <section className="whyBlock">
-          <div className="whyGrid whyGrid--two">
-            <div className="whyCol">
-              <p className="whyEyebrow">What this is</p>
-              <p className="whyText">
-                ChatGPT and Claude only cite a few pages when they answer buyer questions.
-                <strong> AEO is the work of becoming one of them.</strong>
-              </p>
-            </div>
-            <div className="whyCol">
-              <p className="whyEyebrow">Variety of scenarios</p>
-              <p className="whyText">
-                Consumer product. Local service. B2B SaaS.
-              </p>
-            </div>
+          <div className="heroSplitRight">
+            <PromptTabs scenarios={scenariosMeta.map((m, i) => ({ ...m, buyerQuery: scenarioList[i].buyerQuery }))} />
           </div>
         </section>
 
@@ -226,7 +273,7 @@ export default async function Page() {
               <h2>Leaderboard</h2>
             </div>
             <span className="sectionMeta">
-              {players.length} player{players.length === 1 ? "" : "s"} · baseline = 1000 · click columns to sort
+              {players.length} player{players.length === 1 ? "" : "s"} · unranked scenarios sit at baseline 1000 · click any cell to view that page
             </span>
           </div>
           {players.length === 0 ? (
@@ -240,6 +287,8 @@ export default async function Page() {
           )}
         </section>
 
+        {recentActivityBlock}
+
         {/* ── 3. SCENARIOS — three cards, properly aligned ── */}
         <section className="section scrollAnchor" id="scenarios">
           <div className="sectionHead">
@@ -247,14 +296,10 @@ export default async function Page() {
               <p className="eyebrow">Arenas</p>
               <h2>Three underdog pages</h2>
             </div>
-            <span className="sectionMeta">brand-spoofed clones of real ~#10 pages</span>
+            <span className="sectionMeta">brand-spoofed clones of real pages ranked #10 in Search</span>
           </div>
           <div className="featureRow">
             {scenarioCards.map(({ scenario, heroImage }) => {
-              // Maple Street's cloned image is a giant copyright-leak logo (the source
-              // Magnolia practice's branding still). AEO image is a screenshot fragment.
-              // Both fall back to the unified italic-serif treatment.
-              const useImg = heroImage && scenario.id === "carryon";
               return (
                 <a
                   key={scenario.id}
@@ -263,7 +308,7 @@ export default async function Page() {
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="featureImage">
-                    {useImg ? (
+                    {heroImage ? (
                       <img src={heroImage} alt={`${scenario.underdog.name} baseline`} loading="lazy" />
                     ) : (
                       <div style={{
@@ -271,14 +316,8 @@ export default async function Page() {
                         height: "100%",
                         display: "grid",
                         placeItems: "center",
-                        background: scenario.id === "aeo-tool"
-                          ? "linear-gradient(135deg, var(--plum) 0%, #2a1f28 100%)"
-                          : scenario.id === "dental"
-                            ? "linear-gradient(135deg, var(--sage) 0%, #2c3a23 100%)"
-                            : "var(--paper-deep)",
-                        color: scenario.id === "aeo-tool" || scenario.id === "dental"
-                          ? "var(--paper-light)"
-                          : "var(--ink-mute)"
+                        background: "var(--paper-deep)",
+                        color: "var(--ink-mute)"
                       }}>
                         <span style={{
                           fontFamily: "var(--font-display)",
@@ -331,7 +370,7 @@ export default async function Page() {
                 <h3>Pick a scenario</h3>
                 <p>
                   Three underdog pages — a carry-on, a dentist, an AEO tool. Each is a brand-spoofed clone of
-                  a real ~#10 page. Real specs. Real weaknesses. Real headroom.
+                  a real page ranked #10 in Search. Real specs. Real weaknesses. Real headroom.
                 </p>
               </div>
             </li>
@@ -364,8 +403,7 @@ export default async function Page() {
                 <h3>Elo updates land here</h3>
                 <p>
                   Pairwise Elo is derived from every match&apos;s ranking and posted back to the leaderboard.
-                  Baseline is anchored at 1000. The board reflects who&apos;s actually winning, not who talks
-                  the most.
+                  Baseline is anchored at 1000.
                 </p>
               </div>
             </li>
@@ -436,63 +474,6 @@ node harness/submit.mjs \\
           </div>
         </section>
 
-        {/* ── 5. RECENT ACTIVITY — only if any ── */}
-        {recentActivity.length > 0 && (
-          <section className="section">
-            <div className="sectionHead">
-              <div>
-                <p className="eyebrow">Activity</p>
-                <h2>Recent</h2>
-              </div>
-              <span className="sectionMeta">{recentActivity.length} events</span>
-            </div>
-            <ul className="activityFeed">
-              {recentActivity.map((e, i) => {
-                const scenario = scenarioList.find((s) => s.id === e.scenarioId);
-                const when = relTime(e.ranAt || e.uploadedAt);
-                if (e.kind === "submission") {
-                  return (
-                    <li className="activityItem" key={`a${i}`}>
-                      <span className="activityWho">{e.name}</span>
-                      <span className="activityVerb">uploaded</span>
-                      <span className="activityWhat">
-                        <a href={`/players/${e.name}/${e.scenarioId}`}>{scenario?.shortLabel} v{e.version}</a>
-                      </span>
-                      <span className="activityWhen">{when}</span>
-                    </li>
-                  );
-                }
-                const ranking = Array.isArray(e.ranking) && e.ranking.length
-                  ? e.ranking
-                  : (e.winner ? [e.winner, e.loser].filter((x) => x && x !== "tie") : []);
-                return (
-                  <li className="activityItem" key={`a${i}`}>
-                    <span className="activityWho">match</span>
-                    <span className="activityVerb">{scenario?.shortLabel}</span>
-                    <span className="activityWhat">
-                      {ranking.length
-                        ? ranking.map((r, idx) => {
-                            const elo = e.elo?.[r];
-                            const delta = elo && Number.isFinite(elo.delta)
-                              ? ` (${elo.delta >= 0 ? "+" : ""}${Math.round(elo.delta)})`
-                              : "";
-                            return (
-                              <span key={r}>
-                                <strong style={{ color: idx === 0 ? "var(--ember-deep)" : "var(--ink)" }}>{r}</strong>
-                                {delta}
-                                {idx < ranking.length - 1 ? " · " : ""}
-                              </span>
-                            );
-                          })
-                        : <span style={{ color: "var(--ink-mute)" }}>tie</span>}
-                    </span>
-                    <span className="activityWhen">{when}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        )}
       </main>
 
       {/* CLIMB BAR */}

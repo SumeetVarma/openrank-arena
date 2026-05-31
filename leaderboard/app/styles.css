@@ -2328,6 +2328,219 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   flex-wrap: wrap;
 }
 
+/* ──────────────────────────────────────────────────────────────
+   Hero split (two-column hero with prompt preview)
+   ────────────────────────────────────────────────────────────── */
+.heroSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: stretch;
+  padding: clamp(28px, 4vw, 56px) 0 clamp(36px, 5vw, 64px);
+  border-bottom: 1px solid var(--rule);
+}
+.heroSplitLeft { min-width: 0; display: flex; flex-direction: column; gap: 0; }
+.heroSplitLeft .heroFinalHead { margin-bottom: var(--s-5); }
+.heroSplitLeft .heroFinalLede { margin-bottom: var(--s-4); }
+.heroSplitLeft .heroFinalLede:last-of-type { margin-bottom: var(--s-5); }
+.heroSplitRight { min-width: 0; display: flex; align-items: stretch; }
+
+.heroStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-5);
+  margin: var(--s-6) 0 0;
+  padding: var(--s-4) 0 0;
+  border-top: 1px solid var(--rule);
+}
+.heroStats > div { display: flex; flex-direction: column; gap: 4px; }
+.heroStats dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+}
+.heroStats dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(28px, 3.2vw, 38px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Prompt demo panel inside the hero */
+.promptDemo {
+  width: 100%;
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: clamp(20px, 2.4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 12px 32px -16px rgba(40, 30, 20, 0.18);
+}
+.promptDemoHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.promptDemoTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(20px, 2.2vw, 26px);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+}
+.promptTabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+.promptTab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.promptTab:hover { color: var(--ink-soft); }
+.promptTab.is-active {
+  background: var(--ink);
+  color: var(--paper-light);
+}
+.promptDemoQuote {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-style: italic;
+  font-size: clamp(19px, 1.9vw, 23px);
+  line-height: 1.45;
+  color: var(--ink);
+  margin: 0;
+  padding: 0 0 0 var(--s-4);
+  border-left: 2px solid var(--ember);
+  font-variation-settings: "opsz" 48, "SOFT" 80, "WONK" 1;
+}
+.promptDemoMark {
+  font-size: 1.4em;
+  color: var(--ember);
+  margin-right: 4px;
+  line-height: 0;
+  vertical-align: -0.1em;
+}
+.promptDemoFoot {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  margin: 0;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 960px) {
+  .heroSplit {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+  .heroStats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .heroStats { grid-template-columns: 1fr 1fr; }
+  .promptDemoHead { flex-direction: column; align-items: flex-start; }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Leaderboard: make per-scenario Elo cells clickable
+   ────────────────────────────────────────────────────────────── */
+.lbCellLink {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted transparent;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.lbCellLink:hover {
+  color: var(--ember);
+  border-bottom-color: currentColor;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Activity feed: clickable rows
+   ────────────────────────────────────────────────────────────── */
+.activityItem--link { padding: 0; }
+.activityRowLink {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) auto minmax(0, 1fr) minmax(0, 2fr) auto auto;
+  align-items: center;
+  gap: var(--s-4);
+  padding: 14px var(--s-3);
+  color: inherit;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.activityRowLink:hover {
+  background: var(--paper-light);
+}
+.activityRowLink:hover .activityArrow {
+  transform: translateX(4px);
+  color: var(--ember);
+}
+.activityNote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-variation-settings: "opsz" 48, "SOFT" 60;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.activityArrow {
+  font-family: var(--font-mono);
+  color: var(--ink-mute);
+  transition: transform 160ms ease, color 160ms ease;
+}
+@media (max-width: 720px) {
+  .activityRowLink {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "who when"
+      "verb verb"
+      "what what"
+      "note note";
+    gap: 4px var(--s-3);
+  }
+  .activityRowLink .activityWho { grid-area: who; }
+  .activityRowLink .activityWhen { grid-area: when; }
+  .activityRowLink .activityVerb { grid-area: verb; }
+  .activityRowLink .activityWhat { grid-area: what; }
+  .activityRowLink .activityNote { grid-area: note; white-space: normal; }
+  .activityRowLink .activityArrow { display: none; }
+}
+
 /* Empty leaderboard state */
 .emptyBoard {
   background: var(--paper-light);

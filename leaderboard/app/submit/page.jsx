@@ -29,6 +29,7 @@ export default function SubmitPage() {
             </h1>
             <p className="submitLede">
               Zip → upload → live. First upload registers your name. Every upload is a new version. Latest version is what plays.
+              Submit one scenario, two, or all three — anything you skip stays at the baseline of <span className="mono">1000</span>.
             </p>
 
             <form

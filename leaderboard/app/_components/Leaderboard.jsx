@@ -100,9 +100,22 @@ export default function Leaderboard({ rows, scenarios }) {
                 {scenarios.map((s) => {
                   const v = row.perScenario[s.id];
                   const d = row.duels?.[s.id] ?? 0;
+                  const cellClass = `lbCell lbCell--num ${d === 0 && !isBaseline ? "lbCell--unranked" : ""}`;
+                  if (v == null) {
+                    return <td key={s.id} className={cellClass}>—</td>;
+                  }
+                  const href = isBaseline
+                    ? `/baseline/${s.id}`
+                    : d > 0
+                      ? `/players/${row.player}/${s.id}`
+                      : null;
                   return (
-                    <td key={s.id} className={`lbCell lbCell--num ${d === 0 && !isBaseline ? "lbCell--unranked" : ""}`}>
-                      {v != null ? Math.round(v) : "—"}
+                    <td key={s.id} className={cellClass}>
+                      {href ? (
+                        <a className="lbCellLink" href={href}>{Math.round(v)}</a>
+                      ) : (
+                        Math.round(v)
+                      )}
                     </td>
                   );
                 })}
