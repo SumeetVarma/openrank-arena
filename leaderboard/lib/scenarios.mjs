@@ -5,6 +5,7 @@ export const scenarios = {
   carryon: {
     id: "carryon",
     label: "Carry-on Travel Backpack",
+    shortLabel: "Carry-on",
     category: "Consumer product",
     buyerQuery: "I need a carry-on travel backpack under $200 for a 10-day trip. Comfortable, organized, durable. What do you recommend?",
     underdog: {
@@ -21,6 +22,7 @@ export const scenarios = {
   dental: {
     id: "dental",
     label: "Family Dentist in Austin, TX",
+    shortLabel: "Dental",
     category: "Local service",
     buyerQuery: "I just moved to Austin and need a family dentist. Looking for someone gentle, accepts most insurance, can see us in the next couple weeks. Who should I go to?",
     underdog: {
@@ -37,6 +39,7 @@ export const scenarios = {
   "aeo-tool": {
     id: "aeo-tool",
     label: "OpenRank",
+    shortLabel: "OpenRank",
     category: "AI Search Visibility · B2B SaaS",
     buyerQuery: "I run marketing at a 40-person startup. I need a tool to track how my brand shows up in ChatGPT, Perplexity, and Gemini. What should I use?",
     underdog: {

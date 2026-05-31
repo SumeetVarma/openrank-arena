@@ -1,11 +1,24 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+// Feedback notes from the friend group. Writes to Redis so it persists on
+// Vercel (the filesystem is read-only at runtime).
+
+import { Redis } from "@upstash/redis";
+
+export const runtime = "nodejs";
+
+const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const redis = HAS_KV
+  ? new Redis({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN
+    })
+  : null;
 
 export async function POST(request) {
-  const form = await request.formData();
-  const password = String(form.get("password") || "");
-  if (process.env.REPORT_PASSWORD && password !== process.env.REPORT_PASSWORD) {
-    return new Response("Invalid shared password", { status: 401 });
+  let form;
+  try {
+    form = await request.formData();
+  } catch {
+    return new Response("Invalid form body", { status: 400 });
   }
 
   const message = String(form.get("message") || "").trim();
@@ -13,25 +26,24 @@ export async function POST(request) {
     return new Response("Missing feedback message", { status: 400 });
   }
 
-  const dataDir = path.join(process.cwd(), "data");
-  const file = path.join(dataDir, "feedback.json");
-  await mkdir(dataDir, { recursive: true });
-  let rows = [];
-  try {
-    rows = JSON.parse(await readFile(file, "utf8"));
-  } catch {
-    rows = [];
-  }
-
-  rows.push({
+  const record = {
     name: String(form.get("name") || "Anonymous").slice(0, 80),
     message: message.slice(0, 2000),
     createdAt: new Date().toISOString()
-  });
-  await writeFile(file, JSON.stringify(rows, null, 2));
+  };
 
-  return new Response(
-    `<!doctype html><html><body style="font-family: system-ui; padding: 40px;"><h1>Got it.</h1><p>Feedback saved. <a href="/">Back to leaderboard</a></p></body></html>`,
-    { headers: { "Content-Type": "text/html" } }
-  );
+  if (redis) {
+    await redis.lpush("feedback:all", JSON.stringify(record));
+    await redis.ltrim("feedback:all", 0, 199);
+  }
+
+  // For form submits from the browser, redirect back to the home page.
+  const accept = request.headers.get("accept") || "";
+  if (accept.includes("text/html")) {
+    return Response.redirect(new URL("/?note=ok", request.url), 303);
+  }
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  });
 }

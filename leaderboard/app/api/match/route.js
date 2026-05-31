@@ -1,5 +1,9 @@
-// Accepts an N-way bout result (ranking of multiple players) and derives all
-// pairwise Elo updates from the ordering. One bout = C(N,2) Elo applications.
+// Accept a match result (ranking of N≥2 entrants), derive all pairwise Elo
+// updates from the ordering, persist the match log.
+//
+// Entrants can be any mix of: players, "baseline", or incumbent slugs.
+// We only update Elo for players and baseline (incumbents are fixed market
+// fixtures — they don't have Elo records of their own).
 
 import { Redis } from "@upstash/redis";
 import { applyDuel, BASELINE_NAME } from "../../../lib/elo.mjs";
@@ -28,6 +32,7 @@ export async function POST(request) {
     sharedPassword,
     scenarioId,
     ranking,
+    entrantKinds = {},
     model,
     rationale,
     signals,
@@ -41,23 +46,31 @@ export async function POST(request) {
   }
   if (!scenarios[scenarioId]) return json({ ok: false, error: "Unknown scenario" }, 400);
   if (!Array.isArray(ranking) || ranking.length < 2) {
-    return json({ ok: false, error: "Need a ranking with at least 2 players" }, 400);
+    return json({ ok: false, error: "Need a ranking with at least 2 entrants" }, 400);
   }
 
-  // Ensure all named players exist (skip baseline)
-  for (const p of ranking) {
-    if (p !== BASELINE_NAME) await ensurePlayer({ name: p });
+  // Ensure player records exist for any 'player' kind entrants
+  for (const ref of ranking) {
+    if (entrantKinds[ref] === "player") {
+      await ensurePlayer({ name: ref });
+    }
   }
 
-  // For each consecutive pair in the ranking, apply Elo as A_wins.
-  // Actually: for ALL pairs (not just consecutive) — higher-ranked beats lower-ranked.
-  // This gives every player full credit for who they beat / who beat them.
+  // For each consecutive pair in the ranking, apply Elo. Higher-ranked beats
+  // lower-ranked. Skip pairs where neither entrant has an Elo record
+  // (incumbent-vs-incumbent — meaningless).
   const eloChanges = {};
+  const eligible = (ref) =>
+    entrantKinds[ref] === "player" || ref === BASELINE_NAME || entrantKinds[ref] === "baseline";
+
   for (let i = 0; i < ranking.length; i++) {
     for (let j = i + 1; j < ranking.length; j++) {
       const winner = ranking[i];
       const loser = ranking[j];
       if (winner === loser) continue;
+      // Skip pure incumbent matchups — no Elo to update
+      if (!eligible(winner) && !eligible(loser)) continue;
+
       const result = await applyDuel({
         redis,
         scenarioId,
@@ -65,7 +78,6 @@ export async function POST(request) {
         playerB: loser,
         outcome: "A_wins"
       });
-      // Merge into eloChanges, keeping first 'before' and latest 'after'
       for (const [p, change] of Object.entries(result)) {
         if (!eloChanges[p]) {
           eloChanges[p] = { before: change.before, after: change.after, delta: change.delta };
@@ -77,11 +89,12 @@ export async function POST(request) {
     }
   }
 
-  const boutId = newRunId();
+  const matchId = newRunId();
   const record = {
-    boutId,
+    matchId,
     scenarioId,
     ranking,
+    entrantKinds,
     model,
     rationale: String(rationale || "").slice(0, 800),
     signals: signals || [],
@@ -91,12 +104,12 @@ export async function POST(request) {
   };
 
   if (redis) {
-    await redis.set(`bout:${scenarioId}:${boutId}`, record);
-    await redis.lpush(`bouts:${scenarioId}:recent`, boutId);
-    await redis.ltrim(`bouts:${scenarioId}:recent`, 0, 199);
+    await redis.set(`match:${scenarioId}:${matchId}`, record);
+    await redis.lpush(`matches:${scenarioId}:recent`, matchId);
+    await redis.ltrim(`matches:${scenarioId}:recent`, 0, 199);
   }
 
-  return json({ ok: true, boutId, elo: eloChanges });
+  return json({ ok: true, matchId, elo: eloChanges });
 }
 
 function json(payload, status = 200) {
