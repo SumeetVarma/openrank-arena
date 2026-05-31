@@ -156,7 +156,7 @@ body::before {
   align-items: center;
   gap: 22px;
   font-family: var(--font-mono);
-  font-size: var(--t-xs);
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--ink-mute);
@@ -184,7 +184,7 @@ body::before {
    ────────────────────────────────────────────────────────────── */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: var(--t-xs);
+  font-size: var(--t-mono-sm);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ember);
@@ -258,14 +258,14 @@ code, kbd, .mono {
 .sectionHead h2 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(28px, 4vw, var(--t-xl));
+  font-size: var(--t-h2);
   letter-spacing: -0.02em;
-  line-height: 1.08;
-  font-variation-settings: "opsz" 64, "SOFT" 30;
+  line-height: 1.06;
+  font-variation-settings: "opsz" 96, "SOFT" 30;
 }
 .sectionMeta {
   font-family: var(--font-mono);
-  font-size: var(--t-xs);
+  font-size: var(--t-mono-sm);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -1550,14 +1550,14 @@ code, kbd, .mono {
 .featureBody h3 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 22px;
+  font-size: var(--t-h3);
   letter-spacing: -0.015em;
-  line-height: 1.15;
+  line-height: 1.12;
   font-variation-settings: "opsz" 96, "SOFT" 20;
 }
 .featureBody h3 .vs {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--ink-mute);
@@ -1565,7 +1565,7 @@ code, kbd, .mono {
   margin-left: 4px;
 }
 .featureBody p {
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   line-height: 1.5;
   color: var(--ink-soft);
 }
@@ -1577,7 +1577,7 @@ code, kbd, .mono {
   padding-top: 12px;
   border-top: 1px dotted var(--rule);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--ink-mute);
@@ -1768,7 +1768,7 @@ code, kbd, .mono {
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 400;
-  font-size: 20px;
+  font-size: var(--t-lede);
   letter-spacing: -0.01em;
   color: var(--paper-light);
   font-variation-settings: "opsz" 96, "SOFT" 100, "WONK" 1;
@@ -1783,7 +1783,7 @@ code, kbd, .mono {
   border-radius: 999px;
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 13px;
+  font-size: var(--t-body-sm);
   letter-spacing: 0.02em;
   transition: background 180ms ease, transform 180ms ease;
 }
@@ -1902,25 +1902,25 @@ code, kbd, .mono {
   grid-template-columns: auto auto 1fr auto;
   align-items: baseline;
   gap: 12px;
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   transition: background 120ms ease;
 }
 .activityItem:hover { background: var(--paper); }
 .activityWho {
   font-weight: 600;
   color: var(--ink);
-  font-size: 15px;
+  font-size: var(--t-body);
 }
 .activityVerb {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--ink-mute);
 }
 .activityWhat {
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1933,7 +1933,7 @@ code, kbd, .mono {
 .activityWhat a:hover { color: var(--ember); border-color: var(--ember); }
 .activityWhen {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   color: var(--ink-mute);
   white-space: nowrap;
 }
@@ -1972,7 +1972,7 @@ code, kbd, .mono {
 .lbTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 16px;
+  font-size: var(--t-body);
   table-layout: fixed;
 }
 .lbTable col.lbColPlayer { width: 36%; }
@@ -1982,7 +1982,7 @@ code, kbd, .mono {
   padding: 14px 10px;
   text-align: left;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 500;
@@ -2016,7 +2016,7 @@ code, kbd, .mono {
 
 .lbCell {
   padding: 12px 8px;
-  font-size: 16px;
+  font-size: var(--t-body);
   vertical-align: baseline;
 }
 .lbCell--name {
@@ -2026,7 +2026,7 @@ code, kbd, .mono {
 }
 .lbRank {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--t-mono);
   color: var(--ink-mute);
   min-width: 22px;
 }
@@ -2133,7 +2133,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .zipPanelTitle {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: var(--ink-mute);
@@ -2157,7 +2157,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .zipList li:last-child { border-bottom: none; padding-bottom: 0; }
 .zipList li code {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   font-weight: 600;
   color: var(--ink);
   background: transparent;
@@ -2165,7 +2165,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .zipList li .req {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -2176,7 +2176,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .zipList li .rec {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -2187,7 +2187,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .zipList li .opt {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -2199,7 +2199,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .zipList li p {
   grid-column: span 2;
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: var(--t-body-sm);
   line-height: 1.5;
   color: var(--ink-soft);
 }
@@ -2215,7 +2215,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .cliPanelTitle {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: rgba(246, 242, 234, 0.5);
@@ -2223,7 +2223,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .cliPanel pre {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--t-mono);
   line-height: 1.7;
   color: var(--paper-light);
   margin: 0;
@@ -2231,7 +2231,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .cliHint {
   margin: var(--s-3) 0 0;
-  font-size: 12px;
+  font-size: var(--t-body-sm);
   line-height: 1.55;
   color: rgba(246, 242, 234, 0.6);
 }
@@ -2239,7 +2239,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   background: rgba(246, 242, 234, 0.1);
   padding: 1px 6px;
   border-radius: 3px;
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   color: var(--ember-soft);
 }
 .cliHint .em {
@@ -2306,7 +2306,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .heroFinalEyebrow {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.22em;
   color: var(--ember);
@@ -2371,7 +2371,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .heroStats > div { display: flex; flex-direction: column; gap: 4px; }
 .heroStats dt {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-mono-xs);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--ink-mute);
@@ -2430,7 +2430,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   border: none;
   font: inherit;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -2466,7 +2466,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .promptDemoFoot {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--ink-mute);
@@ -2526,7 +2526,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .activityNote {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   color: var(--ink-soft);
   font-variation-settings: "opsz" 48, "SOFT" 60;
   overflow: hidden;
@@ -2545,7 +2545,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.04);
   color: var(--ink-mute);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   letter-spacing: 0.04em;
 }
 @media (max-width: 720px) {
@@ -2583,13 +2583,13 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .emptyBoardHead {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 26px;
+  font-size: var(--t-h3);
   letter-spacing: -0.015em;
   margin: 0;
   font-variation-settings: "opsz" 96, "SOFT" 30;
 }
 .emptyBoardSub {
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   color: var(--ink-mute);
   margin: 0 0 var(--s-2);
 }
@@ -2597,7 +2597,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 /* Scenario feature card refinements */
 .featureCategory {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -2606,15 +2606,15 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .featureBody h3 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 26px;
+  font-size: var(--t-h3);
   letter-spacing: -0.02em;
-  line-height: 1.05;
+  line-height: 1.04;
   margin: 0 0 4px;
   font-variation-settings: "opsz" 96, "SOFT" 20;
 }
 .featureVs {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   color: var(--ink-mute);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2623,7 +2623,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .featureBuyer {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   line-height: 1.5;
   color: var(--ink-soft);
   margin: 0 0 var(--s-3);
@@ -2675,13 +2675,13 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .howSteps h3 {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 22px;
+  font-size: var(--t-h3);
   letter-spacing: -0.015em;
   margin: 0 0 6px;
   font-variation-settings: "opsz" 96, "SOFT" 30;
 }
 .howSteps p {
-  font-size: 15px;
+  font-size: var(--t-body);
   line-height: 1.55;
   color: var(--ink-soft);
   margin: 0;
@@ -2689,7 +2689,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .howSteps p code {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--t-mono);
   background: var(--paper-deep);
   padding: 1px 6px;
   border-radius: 3px;
@@ -2788,7 +2788,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -3146,7 +3146,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .judgePromptTitle {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(22px, 2.4vw, 28px);
+  font-size: var(--t-h3);
   letter-spacing: -0.015em;
   color: var(--ink);
   margin: 0 0 8px;
@@ -3154,7 +3154,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .judgePromptSub {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   color: var(--ink-soft);
   max-width: 60ch;
   line-height: 1.5;
@@ -3166,7 +3166,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   color: #ece5d6;
   border-radius: 10px;
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--t-mono);
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
@@ -3181,7 +3181,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .judgePromptFoot {
   margin: 0;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--t-mono-sm);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--ink-mute);
@@ -3236,20 +3236,20 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .feedbackName {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 15px;
+  font-size: var(--t-body);
   color: var(--ink);
   font-variation-settings: "opsz" 48, "SOFT" 20;
 }
 .feedbackWhen {
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--t-mono-xs);
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--ink-mute);
 }
 .feedbackBody {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--t-body);
   line-height: 1.55;
   color: var(--ink-soft);
   white-space: pre-wrap;
@@ -3267,7 +3267,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .feedbackFormTitle {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 20px;
+  font-size: var(--t-lede);
   letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0 0 8px;
@@ -3275,14 +3275,14 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 .feedbackFormSub {
   margin: 0 0 var(--s-4);
-  font-size: 13.5px;
+  font-size: var(--t-body-sm);
   line-height: 1.5;
   color: var(--ink-soft);
 }
 .feedbackForm form { display: flex; flex-direction: column; gap: var(--s-3); }
 .feedbackForm textarea {
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--t-body-sm);
   line-height: 1.5;
   padding: 10px 12px;
   border: 1px solid var(--rule);
@@ -3358,7 +3358,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   display: block;
   margin-top: 4px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #21a35a;
@@ -3368,7 +3368,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   display: block;
   margin-top: 4px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-mute);
@@ -3378,7 +3378,7 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   display: block;
   margin-top: 4px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--t-mono-xs);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ember);
@@ -3416,6 +3416,268 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .lbTable tbody tr.lbRow:nth-child(2):hover .lbRank { transform: scale(1.18); color: #9aa3ac; }
 .lbTable tbody tr.lbRow:nth-child(3):hover .lbRank { transform: scale(1.12); color: #a0673d; }
 
+/* ──────────────────────────────────────────────────────────────
+   Polish pass — section rhythm, parity for bottom sections,
+   final-round weight, three new quirky moments
+   ────────────────────────────────────────────────────────────── */
+
+/* Section rhythm — harmonic, not uniform.
+   Default .section gap is --s-9 (96px). Tighten the pair that is
+   conceptually a continuation (leaderboard → final round → activity)
+   and breathe between the heavier blocks. */
+.section#final-round         { margin-top: var(--s-6); }   /* 32 — tucks under leaderboard */
+.section#final-round + .section { margin-top: var(--s-7); } /* 48 — recent submissions */
+.section#scenarios           { margin-top: var(--s-9); }   /* 96 — full reset before arenas */
+.section#how                 { margin-top: var(--s-8); }   /* 64 */
+.section#submit              { margin-top: var(--s-9); }   /* 96 */
+.section#judge               { margin-top: var(--s-8); }   /* 64 — paired with submit */
+.section#feedback            { margin-top: var(--s-9); }   /* 96 — final break */
+
+/* The final-round callout sits inside its own section; remove the
+   doubled top margin from the legacy .finalRoundSection rule. */
+.finalRoundSection { margin-top: 0; margin-bottom: 0; }
+
+/* ── Final round prominent — extra weight + slow lock breathe ── */
+.finalRoundCallout--prominent {
+  /* Promote with a touch of paper depth and an inner highlight */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 40px -24px rgba(140, 50, 20, 0.28),
+    0 4px 10px -4px rgba(140, 50, 20, 0.10);
+}
+.finalRoundCallout--prominent::before {
+  /* Make the lock emoji subtly breathe — implies "guarded set" */
+  animation: lockBreathe 6.2s ease-in-out infinite;
+  transform-origin: 70% 30%;
+}
+@keyframes lockBreathe {
+  0%, 100% { transform: rotate(-8deg) scale(1); opacity: 0.12; }
+  50%      { transform: rotate(-6deg) scale(1.04); opacity: 0.18; }
+}
+/* Tiny mono datestamp under the final-round h3 — gives it the feel of
+   a real published rule, not a marketing aside. */
+.finalRoundCallout--prominent h3::after {
+  content: " ·";
+  color: var(--ember);
+  opacity: 0.4;
+  margin-left: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Judge prompt viewer — parity polish with the rest of the page
+   ────────────────────────────────────────────────────────────── */
+.judgePrompt {
+  /* Match the paper-light card depth used by featureCard + zipPanel */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 8px 24px -16px rgba(74, 50, 20, 0.10);
+  position: relative;
+  overflow: hidden;
+}
+/* "verbatim" stamp in the top-right corner — paper-aged, slightly skewed */
+.judgePrompt::before {
+  content: "verbatim";
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  font-family: var(--font-mono);
+  font-size: var(--t-mono-xs);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ember);
+  padding: 4px 10px;
+  border: 1px dashed var(--ember);
+  border-radius: 4px;
+  transform: rotate(-3deg);
+  opacity: 0.55;
+  pointer-events: none;
+  background: rgba(197, 69, 12, 0.04);
+}
+@media (max-width: 720px) {
+  .judgePrompt::before { display: none; }
+}
+/* Black prompt body: faint top scanline shimmer so it reads as "live source" */
+.judgePromptBody {
+  position: relative;
+}
+.judgePromptBody::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 3px,
+      rgba(255, 255, 255, 0.012) 3px 4px
+    );
+  border-radius: 10px;
+}
+
+/* Caret in the title — same typewriter feel as the hero #10 */
+.judgePromptTitle::after {
+  content: "_";
+  color: var(--ember);
+  margin-left: 6px;
+  font-style: normal;
+  animation: caretBlink 1.4s steps(2, end) infinite;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Feedback section — bring to parity with top sections
+   ────────────────────────────────────────────────────────────── */
+/* Each note: subtle paper-pinned feel on hover; existing colored left rail. */
+.feedbackItem {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 220ms ease;
+}
+.feedbackItem:hover {
+  transform: translateY(-1px) rotate(-0.15deg);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 6px 18px -14px rgba(74, 50, 20, 0.20);
+}
+/* Open-quote glyph in the upper-left of each note — turns chatter into a letter */
+.feedbackItem .feedbackBody::before {
+  content: "“";
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.6em;
+  line-height: 0;
+  color: var(--ember);
+  margin-right: 4px;
+  vertical-align: -0.25em;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+.feedbackItem:nth-child(3n+2) .feedbackBody::before { color: var(--sage); }
+.feedbackItem:nth-child(3n+3) .feedbackBody::before { color: var(--plum); }
+
+/* Form: match featureCard depth */
+.feedbackForm {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 8px 24px -16px rgba(74, 50, 20, 0.10);
+}
+.feedbackForm input {
+  font-family: inherit;
+  font-size: var(--t-body-sm);
+  line-height: 1.5;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.feedbackFormTitle::before {
+  content: "✎ ";
+  color: var(--ember);
+  margin-right: 2px;
+  font-style: normal;
+  vertical-align: 1px;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   NEW QUIRK #1 — Masthead "Arena" diamond, stroke-drawn on first paint
+   ────────────────────────────────────────────────────────────── */
+.mastheadBrand::before {
+  content: "◇";
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 0.7em;
+  color: var(--ember);
+  vertical-align: 2px;
+  /* Use a fixed-width SVG-ish look via outline */
+  animation: brandMarkIn 1100ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both,
+             brandMarkSpin 14s linear infinite 1400ms;
+  transform-origin: center;
+}
+@keyframes brandMarkIn {
+  0%   { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+  60%  { opacity: 1; transform: rotate(15deg)  scale(1.2); }
+  100% { opacity: 1; transform: rotate(0)      scale(1);   }
+}
+@keyframes brandMarkSpin {
+  /* Once per 14s, do a slow quarter-rotation flick. Mostly idle. */
+  0%, 90%  { transform: rotate(0); }
+  95%      { transform: rotate(90deg); }
+  100%     { transform: rotate(0); }
+}
+.mastheadBrand:hover::before {
+  color: var(--ember-deep);
+  animation: brandMarkSpin 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   NEW QUIRK #2 — Top-rank #1 row: gold-leaf shimmer on hover
+   We paint the gradient directly onto the row's background so it
+   works without relying on ::after positioning on <tr> (which is
+   historically unreliable in some engines).
+   ────────────────────────────────────────────────────────────── */
+.lbTable tbody tr.lbRow:nth-child(1):not(.is-baseline):hover {
+  background:
+    linear-gradient(
+      100deg,
+      transparent 30%,
+      rgba(200, 155, 44, 0.16) 48%,
+      rgba(245, 216, 130, 0.28) 50%,
+      rgba(200, 155, 44, 0.16) 52%,
+      transparent 70%
+    ),
+    rgba(197, 69, 12, 0.035);
+  background-size: 220% 100%, 100% 100%;
+  background-position: 100% 0, 0 0;
+  animation: goldLeafSweep 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+@keyframes goldLeafSweep {
+  0%   { background-position: 100% 0, 0 0; }
+  100% { background-position: -20% 0, 0 0; }
+}
+/* Pin a faint crown glyph next to the leader's rank cell — sits dim,
+   sharpens on hover. Only visible when sorted by Overall (default). */
+.lbTable tbody tr.lbRow:nth-child(1):not(.is-baseline) .lbRank::after {
+  content: " ♛";
+  color: #c89b2c;
+  opacity: 0.55;
+  font-size: 0.85em;
+  transition: opacity 220ms ease, transform 220ms ease;
+  display: inline-block;
+}
+.lbTable tbody tr.lbRow:nth-child(1):not(.is-baseline):hover .lbRank::after {
+  opacity: 1;
+  transform: translateY(-1px) rotate(-6deg);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   NEW QUIRK #3 — Climb-bar CTA wave on first scroll-into-view
+   Uses scroll-driven animation where supported; gracefully no-ops
+   in older browsers (the existing halo still pulses).
+   ────────────────────────────────────────────────────────────── */
+@supports (animation-timeline: view()) {
+  .climbBar strong {
+    /* Each character would be ideal, but we'd need JSX changes; do a
+       gentle skew/slide on the whole strong instead — reads as a wave. */
+    animation: climbWave linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 35%;
+  }
+  @keyframes climbWave {
+    0%   { transform: translateY(8px) skewX(-3deg); letter-spacing: 0.04em; opacity: 0.5; }
+    60%  { transform: translateY(0)   skewX(0);    letter-spacing: -0.005em; opacity: 1; }
+    100% { transform: translateY(0)   skewX(0);    letter-spacing: -0.005em; opacity: 1; }
+  }
+  .climbBar .climbCta {
+    animation: climbCtaPop linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+  @keyframes climbCtaPop {
+    0%   { transform: scale(0.92) translateX(-6px); }
+    100% { transform: scale(1)    translateX(0); }
+  }
+}
+
 /* Respect reduced-motion users — disable all the loops + drifts. */
 @media (prefers-reduced-motion: reduce) {
   .heroSplit::before,
@@ -3424,12 +3686,20 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   .climbBar .climbCta::after,
   .heroFinalHead .acc::after,
   .submitThreeUp .zipPanel .zipPanelTitle::after,
-  .lbHintDot {
+  .lbHintDot,
+  .mastheadBrand::before,
+  .finalRoundCallout--prominent::before,
+  .judgePromptTitle::after,
+  .lbTable tbody tr.lbRow:nth-child(1):not(.is-baseline):hover::after {
     animation: none !important;
   }
   .heroSplitLeft > *,
   .heroSplitRight,
   .promptDemoQuote {
+    animation: none !important;
+  }
+  .climbBar strong,
+  .climbBar .climbCta {
     animation: none !important;
   }
 }
