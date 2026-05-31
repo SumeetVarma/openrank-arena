@@ -382,43 +382,28 @@ export default async function Page() {
               <span className="howNum">01</span>
               <div>
                 <h3>Pick a scenario</h3>
-                <p>
-                  Three underdog pages — a carry-on, a dentist, an AEO tool. Each is a brand-spoofed clone of
-                  a real page ranked #10 in Search. Real specs. Real weaknesses. Real headroom.
-                </p>
+                <p>Three underdog pages, each a spoofed clone of a real page ranked #10.</p>
               </div>
             </li>
             <li>
               <span className="howNum">02</span>
               <div>
                 <h3>Rewrite the page</h3>
-                <p>
-                  Tighten the copy, sharpen the schema, fix the <code>llms.txt</code>, surface the buyer-relevant
-                  claims first. Ship an <code>index.html</code> + <code>assets/</code> zip. Iterate as often as
-                  you want.
-                </p>
+                <p>Ship a zip with <code>index.html</code>, <code>llms.txt</code>, and <code>assets/</code>.</p>
               </div>
             </li>
             <li>
               <span className="howNum">03</span>
               <div>
                 <h3>Anyone runs a match</h3>
-                <p>
-                  Any player can run <code>match.mjs</code> from the CLI. The judge sees two or more anonymized
-                  versions side by side with the real market for context, then picks the most credible page.
-                  Fabricated claims (fake reviews, fake awards, fake prices) get flagged and the page sinks
-                  in the ranking.
-                </p>
+                <p>A blind judge compares your version against the others. Fakes get penalized.</p>
               </div>
             </li>
             <li>
               <span className="howNum">04</span>
               <div>
-                <h3>Elo updates land here</h3>
-                <p>
-                  Pairwise Elo is derived from every match&apos;s ranking and posted back to the leaderboard.
-                  Baseline is anchored at 1000.
-                </p>
+                <h3>Elo lands on the board</h3>
+                <p>Pairwise Elo, baseline anchored at 1000.</p>
               </div>
             </li>
           </ol>
