@@ -41,7 +41,7 @@ export const scenarios = {
     label: "OpenRank",
     shortLabel: "OpenRank",
     category: "AI Search Visibility · B2B SaaS",
-    buyerQuery: "I run marketing at a 40-person startup. I need a tool to track how my brand shows up in ChatGPT, Perplexity, and Gemini. What should I use?",
+    buyerQuery: "I run marketing at a 40-person startup. I need a tool to track — and improve — how my brand shows up in ChatGPT, Perplexity, and Gemini. What should I use?",
     underdog: {
       slug: "openrank",
       name: "OpenRank",

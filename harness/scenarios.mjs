@@ -28,7 +28,7 @@ export const scenarios = {
     id: "aeo-tool",
     label: "OpenRank",
     buyerQuery:
-      "I run marketing at a 40-person startup. I need a tool to track how my brand shows up in ChatGPT, Perplexity, and Gemini. What should I use?",
+      "I run marketing at a 40-person startup. I need a tool to track — and improve — how my brand shows up in ChatGPT, Perplexity, and Gemini. What should I use?",
     underdog: { slug: "openrank", name: "OpenRank" },
     incumbents: [
       { slug: "lumen-aeo", name: "Lumen AEO" },
