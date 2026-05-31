@@ -84,13 +84,22 @@ everyone in the friend group sees those.
 
 ## Vercel + the hobby plan
 
-This project runs on Vercel's free Hobby tier. To keep it that way:
+This project runs on Vercel's free Hobby tier.
 
-- Contributors stay as PR authors only — they're never added to the Vercel
-  team (that would trigger a seat fee).
-- Preview deploys for PRs come from Vercel automatically; the maintainer
-  reviews them on the PR before merging to `main` (which triggers the
-  production deploy).
-- If you need a long-running preview environment, fork the repo and link
-  your fork to your own Vercel account.
+- **Hobby teams are single-owner** — contributors can't be added even if we
+  wanted to, so there's no seat-fee risk from accepting PRs.
+- **Preview deploys for fork PRs require the maintainer to click an
+  "authorize deployment" link** Vercel posts on the PR. This is a security
+  measure to prevent fork PRs from accessing project secrets. Once
+  authorized, the preview URL appears as a comment on the PR — that's what
+  the maintainer reviews before merging.
+- Branch PRs opened from inside this repo (rare for an open-source project)
+  do deploy automatically.
+- If you want a persistent preview environment of your own changes, fork
+  the repo and connect your fork to your own Vercel account.
+
+Hobby-tier limits worth knowing about (so PRs don't accidentally blow them):
+4 Active CPU hours / 1M function invocations / 360 GB-hr memory per month.
+This project is non-commercial; if that changes the maintainer upgrades to
+Pro, not the contributors.
 
