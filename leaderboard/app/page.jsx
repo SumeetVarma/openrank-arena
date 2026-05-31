@@ -357,10 +357,6 @@ export default async function Page() {
                   placeholder="Scenario ideas, judge prompt tweaks, things that broke…"
                 />
               </div>
-              <div className="formField">
-                <label className="formLabel" htmlFor="fb-pw">Shared password</label>
-                <input id="fb-pw" name="password" type="password" required placeholder="shared password" />
-              </div>
               <div>
                 <button className="btn" type="submit">Post note</button>
               </div>
