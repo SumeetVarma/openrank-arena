@@ -201,30 +201,18 @@ export default async function Page() {
 
         {/* ── 1.5 WHY ── */}
         <section className="whyBlock">
-          <div className="whyGrid">
+          <div className="whyGrid whyGrid--two">
             <div className="whyCol">
               <p className="whyEyebrow">What this is</p>
               <p className="whyText">
-                When ChatGPT, Perplexity, or Claude answer a buyer&apos;s question, only a few pages get
-                cited. <strong>Answer Engine Optimization</strong> is the practice of being one of them.
-                This is a benchmark for it — three real underdog pages, head-to-head against your friends&apos;
-                rewrites, scored by an LLM judge.
+                ChatGPT and Claude only cite a few pages when they answer buyer questions.
+                <strong> AEO is the work of becoming one of them.</strong>
               </p>
             </div>
             <div className="whyCol">
-              <p className="whyEyebrow">Why three scenarios</p>
+              <p className="whyEyebrow">Variety of scenarios</p>
               <p className="whyText">
-                A consumer product, a local service, and a B2B SaaS. Three categories with different buyer
-                intent and AEO levers. A winning playbook should generalize across all three — not just
-                work on one.
-              </p>
-            </div>
-            <div className="whyCol">
-              <p className="whyEyebrow">Why anonymized</p>
-              <p className="whyText">
-                The judge never sees your name and never knows it&apos;s a benchmark. It thinks it&apos;s
-                helping a friend shop. Pages compete on what crawlers and buyers actually read —
-                structure, claims, evidence.
+                Consumer product. Local service. B2B SaaS.
               </p>
             </div>
           </div>

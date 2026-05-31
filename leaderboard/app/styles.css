@@ -2248,8 +2248,12 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   grid-template-columns: repeat(3, 1fr);
   gap: var(--s-7);
 }
+.whyGrid.whyGrid--two {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
 @media (max-width: 880px) {
   .whyGrid { grid-template-columns: 1fr; gap: var(--s-5); }
+  .whyGrid.whyGrid--two { grid-template-columns: 1fr; }
 }
 .whyCol { max-width: 38ch; }
 .whyEyebrow {
