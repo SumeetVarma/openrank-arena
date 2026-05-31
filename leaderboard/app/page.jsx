@@ -150,10 +150,7 @@ export default async function Page() {
               Drag it <span className="acc">uphill</span>.
             </h1>
             <p>
-              You&apos;ll be given short product pages from underdog brands. Rewrite the copy.
-              Sharpen the schema. Prune the swagger. Then send it into an{" "}
-              <strong style={{ color: "var(--ink)" }}>anonymized duel</strong>. A friend ships,
-              a judge decides. Nobody knows it&apos;s a game. Retire gaps and harden underdogs.
+              Three underdog pages. Three categories. Rewrite, restructure, tune the schema. Upload your version. The judge picks the more credible one of every pair. Elo updates. Climb.
             </p>
             <div className="heroActions">
               <a className="btn" href="/submit">Submit your page</a>
@@ -167,7 +164,6 @@ export default async function Page() {
                 <dt>Players</dt>
                 <dd className="tnum">
                   {String(players.length).padStart(2, "0")}
-                  <span className="sub">/ 5</span>
                 </dd>
               </div>
               <div className="boardStat">
@@ -264,9 +260,9 @@ export default async function Page() {
           <div className="sectionHead">
             <div>
               <p className="eyebrow">Standings</p>
-              <h2>Every player. Every scenario.</h2>
+              <h2>Leaderboard</h2>
             </div>
-            <span className="sectionMeta">Baseline = 1000 · Goal = 2000</span>
+            <span className="sectionMeta">Baseline = 1000</span>
           </div>
 
           <div className="boardWrap">
@@ -333,12 +329,82 @@ export default async function Page() {
           </div>
         </section>
 
+        {/* ──── The judge prompt (verbatim) ──── */}
+        <section className="section">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">The judge</p>
+              <h2>The actual prompt. No marketing copy.</h2>
+            </div>
+            <span className="sectionMeta">Same prompt every duel · open-source</span>
+          </div>
+          <pre className="promptBlock">{`You're helping a friend make a real buying decision. They asked:
+
+`}<span className="blockquote">{`"I need a carry-on travel backpack under $200 for a 10-day trip.
+Comfortable, organized, durable. What do you recommend?"`}</span>{`
+
+You pulled up the candidate pages an AI answer engine surfaced. Most are
+from established competitors in the market. Two of the pages are from the
+same lesser-known option — both have been anonymized to the same
+placeholder name so the brand name doesn't bias your judgment. They
+represent two different versions of that same option's web presence.
+
+Here's the market context — established players in this category:
+
+`}<span className="hdg">{"### Voyager Pro 40"}</span>{`
+`}<span className="dim">{"<page content...>"}</span>{`
+
+`}<span className="hdg">{"### Roamcore Travel Pack"}</span>{`
+`}<span className="dim">{"<page content...>"}</span>{`
+
+And here are the two versions of the same lesser-known option you've
+been asked to compare:
+
+`}<span className="hdg">{"### Page A"}</span>{`
+`}<span className="dim">{"<player A's optimized page>"}</span>{`
+
+`}<span className="hdg">{"### Page B"}</span>{`
+`}<span className="dim">{"<player B's optimized page>"}</span>{`
+
+Both Page A and Page B describe the same underlying option. Treat them
+as two attempts to explain the same thing — your job is to decide which
+one would more credibly stand alongside the established competitors
+above and earn a recommendation, if your friend was actually deciding
+right now.
+
+`}<span className="em">{`Be honest. Don't reward marketing fluff. Don't reward made-up claims
+(fake reviews, fake awards, fake integrations, fake prices) — if you
+spot fabrication, that page should lose. A tie is fine if both are
+genuinely equivalent.`}</span>{`
+
+When you're done, write 3–5 sentences explaining your call, then end
+with a JSON object:
+
+`}<span className="json">{`{
+  "winner": "A" | "B" | "tie",
+  "rationale": "one-paragraph why",
+  "signals_compared": [
+    { "signal": "clarity_of_answer",   "stronger": "A" | "B" | "tie" },
+    { "signal": "structured_claims",   "stronger": "A" | "B" | "tie" },
+    { "signal": "first_impression",    "stronger": "A" | "B" | "tie" },
+    { "signal": "concrete_specifics",  "stronger": "A" | "B" | "tie" },
+    { "signal": "visual_evidence",     "stronger": "A" | "B" | "tie" },
+    { "signal": "honest_fit",          "stronger": "A" | "B" | "tie" },
+    { "signal": "truthfulness",        "stronger": "A" | "B" | "tie" }
+  ]
+}`}</span></pre>
+          <p style={{ marginTop: 16, fontSize: 13, color: "var(--ink-mute)", fontStyle: "italic" }}>
+            That&apos;s it. Same prompt every duel. Same buyer query per scenario. The judge never knows it&apos;s a benchmark.
+            Source: <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/harness/duel.mjs">harness/duel.mjs</a>
+          </p>
+        </section>
+
         {/* ──── Notes ──── */}
         <section className="section">
           <div className="sectionHead">
             <div>
-              <p className="eyebrow">House notes</p>
-              <h2>Suggestions from the friend group.</h2>
+              <p className="eyebrow">Notes</p>
+              <h2>Scenario ideas, bugs, tweaks</h2>
             </div>
             <span className="sectionMeta">{feedbackRows.length} note{feedbackRows.length === 1 ? "" : "s"}</span>
           </div>
