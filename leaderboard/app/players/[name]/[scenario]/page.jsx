@@ -6,31 +6,19 @@ import {
   verifySubmissionPassword
 } from "../../../../lib/storage.mjs";
 import { loadSubmissionAssets } from "../../../../lib/submissionAssets.mjs";
-import { splitSubmittedHtml } from "../../../../lib/submissionHtml.mjs";
+import { parseSubmittedHtml } from "../../../../lib/submissionHtml.mjs";
 
 export async function generateMetadata({ params }) {
   const { name, scenario: scenarioId } = await params;
   const scenario = getScenario(scenarioId);
   if (!scenario) return {};
-  // Try to extract title and description from the player's submitted HTML
-  // so their AEO-tuned <head> tags actually land in <head>.
   try {
     const submission = await getLatestSubmission(name, scenarioId);
     if (submission) {
       const assets = await loadSubmissionAssets(submission.blobPath);
       if (assets.html) {
-        const titleMatch = assets.html.match(/<title>([\s\S]*?)<\/title>/i);
-        const descMatch = assets.html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i);
-        const ogTitle = assets.html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
-        const ogDesc = assets.html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
-        return {
-          title: titleMatch ? titleMatch[1].trim() : `${name} — ${scenario.label}`,
-          description: descMatch ? descMatch[1] : `${name}'s submission for the ${scenario.label} scenario.`,
-          openGraph: {
-            title: ogTitle ? ogTitle[1] : (titleMatch ? titleMatch[1].trim() : name),
-            description: ogDesc ? ogDesc[1] : descMatch?.[1] || scenario.label
-          }
-        };
+        const { metadata } = parseSubmittedHtml(assets.html);
+        return buildNextMetadata(metadata, { name, scenario });
       }
     }
   } catch {
@@ -104,7 +92,7 @@ export default async function PlayerScenarioPage({ params, searchParams }) {
     );
   }
 
-  const { headTags, bodyHtml } = splitSubmittedHtml(
+  const { jsonLd, bodyHtml } = parseSubmittedHtml(
     assets.html || "<p>Submission did not include an <code>index.html</code>.</p>"
   );
 
@@ -130,14 +118,52 @@ export default async function PlayerScenarioPage({ params, searchParams }) {
           </details>
         )}
       </nav>
-      {headTags.length > 0 && (
-        <div
-          style={{ display: "none" }}
-          aria-hidden="true"
-          dangerouslySetInnerHTML={{ __html: headTags.join("\n") }}
-        />
-      )}
       <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      {jsonLd.map((j, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: j }}
+        />
+      ))}
     </main>
   );
+}
+
+function buildNextMetadata(meta, { name, scenario }) {
+  const title = meta.title || `${name} — ${scenario.label}`;
+  const description = meta.description || `${name}'s submission for the ${scenario.label} scenario.`;
+
+  const next = { title, description };
+
+  if (meta.keywords) next.keywords = meta.keywords;
+  if (meta.robots) next.robots = meta.robots;
+  if (meta.authors || meta.author) next.authors = [{ name: meta.author }];
+  if (meta.canonical) next.alternates = { canonical: meta.canonical };
+
+  const og = meta.og || {};
+  if (og.title || og.description || og.image || og.url) {
+    next.openGraph = {
+      title: og.title || title,
+      description: og.description || description,
+      url: og.url || undefined,
+      siteName: og.siteName || undefined,
+      type: og.type || "website",
+      images: og.image ? [{ url: og.image }] : undefined
+    };
+  }
+
+  const tw = meta.twitter || {};
+  if (tw.card || tw.title || tw.description || tw.image) {
+    next.twitter = {
+      card: tw.card || "summary",
+      title: tw.title || title,
+      description: tw.description || description,
+      site: tw.site || undefined,
+      creator: tw.creator || undefined,
+      images: tw.image ? [tw.image] : undefined
+    };
+  }
+
+  return next;
 }

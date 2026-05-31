@@ -5,6 +5,7 @@ import {
   verifySubmissionPassword
 } from "../../../../../../lib/storage.mjs";
 import { loadSubmissionAssets } from "../../../../../../lib/submissionAssets.mjs";
+import { parseSubmittedHtml } from "../../../../../../lib/submissionHtml.mjs";
 
 export default async function PlayerScenarioVersionPage({ params, searchParams }) {
   const { name, scenario: scenarioId, version } = await params;
@@ -30,7 +31,9 @@ export default async function PlayerScenarioVersionPage({ params, searchParams }
   }
 
   const assets = await loadSubmissionAssets(submission.blobPath);
-  const html = assets.html || "<p>Submission did not include an <code>index.html</code>.</p>";
+  const { jsonLd, bodyHtml } = parseSubmittedHtml(
+    assets.html || "<p>Submission did not include an <code>index.html</code>.</p>"
+  );
 
   return (
     <main className="renderedPage">
@@ -40,7 +43,14 @@ export default async function PlayerScenarioVersionPage({ params, searchParams }
           {name} · {scenario.label} · v{version} (history)
         </span>
       </nav>
-      <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: html }} />
+      <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      {jsonLd.map((j, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: j }}
+        />
+      ))}
     </main>
   );
 }
