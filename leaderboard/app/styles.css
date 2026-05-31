@@ -2236,6 +2236,49 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
    Restructured home page (Phase 5.5)
    ─────────────────────────────────────────────────────────────── */
 
+/* Why block (context for newcomers) */
+.whyBlock {
+  margin: var(--s-7) 0 var(--s-7);
+  padding: var(--s-6) 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.whyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-7);
+}
+@media (max-width: 880px) {
+  .whyGrid { grid-template-columns: 1fr; gap: var(--s-5); }
+}
+.whyCol { max-width: 38ch; }
+.whyEyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ember);
+  margin: 0 0 var(--s-3);
+}
+.whyText {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+  font-variation-settings: "opsz" 48, "SOFT" 0;
+}
+.whyText strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.whyText em {
+  font-style: italic;
+  color: var(--ember-deep);
+  font-variation-settings: "opsz" 48, "SOFT" 100, "WONK" 1;
+}
+
 /* Compact final hero */
 .heroFinal {
   padding: var(--s-7) 0 var(--s-7);

@@ -127,7 +127,7 @@ export default function SubmitPage() {
             <div className="cliPanel">
               <p className="cliPanelTitle">Or — from your terminal</p>
               <pre>{`node harness/submit.mjs \\
-  --name alice \\
+  --name i-forgot-to-update-my-name \\
   --scenario carryon \\
   --dir ./my-page \\
   --note "tightened headings"`}</pre>

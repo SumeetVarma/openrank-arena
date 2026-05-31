@@ -174,6 +174,14 @@ export async function uploadZip({ name, scenario, version, buffer }) {
     });
     return { url, pathname };
   }
+  // No Blob configured. On Vercel this would crash because the runtime fs is
+  // read-only; instead surface a clear configuration error.
+  if (process.env.VERCEL || process.env.NEXT_PUBLIC_VERCEL_URL) {
+    throw new Error(
+      "Storage not configured: Vercel Blob is connected to this project but BLOB_READ_WRITE_TOKEN is not set in env. Open Vercel → project → Storage → Blob → 'Connect to project' → confirm the token is injected, then redeploy."
+    );
+  }
+  // Local dev only
   const fs = await import("node:fs/promises");
   const pathMod = await import("node:path");
   const dest = pathMod.resolve(process.cwd(), ".blob-store", path);

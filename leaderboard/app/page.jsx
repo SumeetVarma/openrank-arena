@@ -183,18 +183,48 @@ export default async function Page() {
       <main>
         {/* ── 1. HERO — compact ── */}
         <section className="heroFinal">
-          <p className="heroFinalEyebrow">Anonymous matches · Truth wins · Real Elo</p>
+          <p className="heroFinalEyebrow">An AEO benchmark · Anonymized matches · Real Elo</p>
           <h1 className="heroFinalHead">
             Beat the page<br />
             ranked <span className="acc">#10</span>.
           </h1>
           <p className="heroFinalLede">
-            Take an underdog page. Rewrite it. Ship it head-to-head against your friends&apos;.
-            A blind judge picks the better version.
+            You vs. four friends vs. a judge that can&apos;t see your name.
           </p>
           <div className="heroFinalActions">
             <a className="btn" href="#submit">Submit your page</a>
             <a className="tlink" href="#scenarios">See scenarios</a>
+          </div>
+        </section>
+
+        {/* ── 1.5 WHY ── */}
+        <section className="whyBlock">
+          <div className="whyGrid">
+            <div className="whyCol">
+              <p className="whyEyebrow">The game</p>
+              <p className="whyText">
+                <strong>AEO is the AEO of post-Google.</strong> When ChatGPT, Perplexity, and Claude answer
+                a buyer&apos;s question, only a few pages get cited. The art of getting cited — clear copy,
+                tight schema, honest claims — is <em>Answer Engine Optimization</em>. This is a closed
+                gym to practice it.
+              </p>
+            </div>
+            <div className="whyCol">
+              <p className="whyEyebrow">Why these three scenarios</p>
+              <p className="whyText">
+                A consumer product, a local service, and a B2B SaaS — three categories with very
+                different buyer logic. Optimizing across all three means you&apos;ve built generalizable
+                AEO chops, not just a copywriting trick that works on backpacks.
+              </p>
+            </div>
+            <div className="whyCol">
+              <p className="whyEyebrow">Why anonymized</p>
+              <p className="whyText">
+                The judge never sees your name, never knows it&apos;s a benchmark. It thinks it&apos;s helping
+                a friend shop. Pages compete on what crawlers and buyers actually read — structure,
+                claims, evidence — not on who wrote them.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -396,7 +426,7 @@ export default async function Page() {
 cd openrank-arena
 
 node harness/submit.mjs \\
-  --name alice \\
+  --name i-forgot-to-update-my-name \\
   --scenario carryon \\
   --dir ./my-page \\
   --note "tightened headings"`}</pre>
