@@ -61,6 +61,9 @@ export default async function Page() {
             or integrations and the judge sniffs it and you eat the rank penalty. Start at 1000 Elo. Try to reach 2000
             before your friends do.
           </p>
+          <p style={{ marginTop: 10, fontStyle: "italic", color: "var(--muted)" }}>
+            "Life is incomplete without Meta :p"
+          </p>
           <p style={{ marginTop: 14 }}>
             <a href="#start" style={{ color: "var(--clay-dark)", fontWeight: 600 }}>
               Get started in 30 seconds →

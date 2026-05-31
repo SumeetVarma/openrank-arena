@@ -56,7 +56,28 @@ export function splitClonedHtml(fullHtml) {
   const bodyMatch = fullHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
 
   const headInner = headMatch ? headMatch[1] : "";
-  const bodyHtml = bodyMatch ? bodyMatch[1] : fullHtml;
+  let bodyHtml = bodyMatch ? bodyMatch[1] : fullHtml;
+
+  // Sanitize body for React hydration: remove tags that conflict with our
+  // outer wrapper or that React can't safely hydrate inside a dangerouslySetInnerHTML.
+  //   - <main>, <body>, <html>, <head>: nested at our wrapper level → invalid
+  //   - <form>, <input>, <select>, <textarea>, <button>: interactive elements that
+  //     React will fight to hydrate as static markup
+  //   - <script>: anything except JSON-LD should be gone; client scripts blow up
+  bodyHtml = bodyHtml
+    // Strip these tags entirely (with content)
+    .replace(/<(form|button|select|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
+    // Strip self-closing/void interactive tags
+    .replace(/<(input|option)\b[^>]*\/?>/gi, "")
+    // Unwrap (keep content, remove tags) for elements that shouldn't nest under <main>
+    .replace(/<\/?(main|body|html|head)\b[^>]*>/gi, "")
+    // Strip non-JSON-LD scripts (JSON-LD is preserved as parsed-out values)
+    .replace(/<script\b(?![^>]*type=["']application\/ld\+json["'])[^>]*>[\s\S]*?<\/script>/gi, "")
+    // Strip noscript and template — they confuse hydration
+    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<template\b[^>]*>[\s\S]*?<\/template>/gi, "")
+    // Strip stray <link> from body
+    .replace(/<link\b[^>]*\/?>/gi, "");
 
   // Extract structured tags from head
   const metaTags = [];
