@@ -33,7 +33,8 @@ export async function POST(request) {
   };
 
   if (redis) {
-    await redis.lpush("feedback:all", JSON.stringify(record));
+    // @upstash/redis serializes objects automatically — pass the record directly.
+    await redis.lpush("feedback:all", record);
     await redis.ltrim("feedback:all", 0, 199);
   }
 

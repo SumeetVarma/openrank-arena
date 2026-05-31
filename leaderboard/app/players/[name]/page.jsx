@@ -76,10 +76,10 @@ export default async function PlayerProfile({ params }) {
           <a href="/" style={{ color: "inherit" }}>OpenRank <em>Arena</em></a>
         </div>
         <nav className="mastheadMeta" aria-label="primary">
-          <a href="/#leaderboard">leaderboard</a>
-          <a href="/#scenarios">scenarios</a>
-          <a href="/#start">join</a>
-          <a href="/submit">submit</a>
+          <a href="/#leaderboard">Leaderboard</a>
+          <a href="/#scenarios">Scenarios</a>
+          <a href="/#how">How it works</a>
+          <a className="btn btn--sm" href="/#submit" style={{ marginLeft: 8 }}>Submit</a>
         </nav>
       </header>
 
@@ -128,7 +128,7 @@ export default async function PlayerProfile({ params }) {
               <dd className="tnum">{scenariosPlayed} / {scenarioList.length}</dd>
             </div>
             <div className="heroNumber">
-              <dt>Duels logged</dt>
+              <dt>Matches</dt>
               <dd className="tnum">{totalDuels}</dd>
             </div>
           </dl>

@@ -35,6 +35,7 @@ async function readJson(file, fallback) {
 
 async function getFeedbackRows() {
   if (redis) {
+    // @upstash/redis returns objects directly (auto-deserialized).
     const raw = (await redis.lrange("feedback:all", 0, 19)) || [];
     return raw
       .map((r) => {
