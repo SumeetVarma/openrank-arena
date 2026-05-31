@@ -1,11 +1,26 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { Redis } from "@upstash/redis";
 import { scenarioList } from "../lib/scenarios.mjs";
 import {
   listPlayers,
   listLatestSubmissionsForScenario,
   getRecentScores
 } from "../lib/storage.mjs";
+import {
+  getLeaderboard,
+  getOverallLeaderboard,
+  SEED_ELO,
+  BASELINE_NAME
+} from "../lib/elo.mjs";
+
+const HAS_KV = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const redis = HAS_KV
+  ? new Redis({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN
+    })
+  : null;
 
 async function readJson(file, fallback) {
   try {
@@ -18,11 +33,14 @@ async function readJson(file, fallback) {
 export default async function Page() {
   const players = await listPlayers();
 
+  const overallEloBoard = await getOverallLeaderboard(redis);
+
   const scenarioCards = await Promise.all(
     scenarioList.map(async (s) => {
       const submissions = await listLatestSubmissionsForScenario(s.id);
       const scores = await getRecentScores(s.id, 10);
-      return { scenario: s, submissions, scores };
+      const eloBoard = await getLeaderboard(redis, s.id);
+      return { scenario: s, submissions, scores, eloBoard };
     })
   );
 
@@ -62,6 +80,48 @@ export default async function Page() {
             <strong>3 · Judge it</strong>
             <span>An AI judge picks the buyer's recommendation from the candidate pool. Truthful wins.</span>
           </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="sectionHead">
+          <div>
+            <p className="eyebrow">Elo standings</p>
+            <h2>Who's winning the duels</h2>
+          </div>
+          <span>baseline = 1000 · goal = 2000</span>
+        </div>
+        <div className="cards">
+          <article className="scenarioCard">
+            <h3>Overall</h3>
+            <p className="small">Average Elo across all scenarios played</p>
+            <ol style={{ paddingLeft: 20, margin: "8px 0 0 0", fontSize: 14 }}>
+              {overallEloBoard.slice(0, 10).map((r) => (
+                <li key={r.player} style={{ padding: "4px 0", color: r.player === BASELINE_NAME ? "var(--muted)" : "var(--ink)" }}>
+                  <strong>{r.player}</strong> · {Math.round(r.rating)}
+                  {r.scenariosPlayed > 0 && (
+                    <span style={{ color: "var(--muted)" }}> · {r.scenariosPlayed} scenarios</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </article>
+          {scenarioCards.map(({ scenario, eloBoard }) => (
+            <article className="scenarioCard" key={`elo-${scenario.id}`}>
+              <h3>{scenario.label}</h3>
+              <p className="small">{eloBoard.filter((r) => r.player !== BASELINE_NAME).length} player{eloBoard.length === 1 ? "" : "s"} with duels</p>
+              <ol style={{ paddingLeft: 20, margin: "8px 0 0 0", fontSize: 14 }}>
+                {eloBoard.slice(0, 10).map((r) => (
+                  <li key={r.player} style={{ padding: "4px 0", color: r.player === BASELINE_NAME ? "var(--muted)" : "var(--ink)" }}>
+                    <strong>{r.player}</strong> · {Math.round(r.rating)}
+                    {r.duels > 0 && (
+                      <span style={{ color: "var(--muted)" }}> · {r.duels} duel{r.duels === 1 ? "" : "s"}</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </article>
+          ))}
         </div>
       </section>
 
