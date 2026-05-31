@@ -57,7 +57,11 @@ export function kFactor(duelsCount) {
 
 // Apply a duel result. Returns the new ratings + deltas.
 //   outcome: "A_wins" | "B_wins" | "tie"
-export async function applyDuel({ redis, scenarioId, playerA, playerB, outcome }) {
+//   mutableA / mutableB: defaults true. Set false for entrants whose rating must
+//     NOT move (incumbents are fixtures; baseline is the 1000 anchor). Without
+//     this, /api/match would silently mutate incumbent Elo records even though
+//     incumbents aren't supposed to have ratings of their own.
+export async function applyDuel({ redis, scenarioId, playerA, playerB, outcome, mutableA = true, mutableB = true }) {
   const ratingA = await getEloFor(redis, playerA, scenarioId);
   const ratingB = await getEloFor(redis, playerB, scenarioId);
   const duelsA = await getDuelsFor(redis, playerA, scenarioId);
@@ -69,25 +73,28 @@ export async function applyDuel({ redis, scenarioId, playerA, playerB, outcome }
   const expectedA = expectedScore(ratingA, ratingB);
   const expectedB = 1 - expectedA;
 
-  const kA = playerA === BASELINE_NAME ? 0 : kFactor(duelsA);
-  const kB = playerB === BASELINE_NAME ? 0 : kFactor(duelsB);
+  // K=0 for non-mutable sides AND for baseline (defense in depth). A side that
+  // is fixed by configuration shouldn't move regardless of caller intent.
+  const kA = !mutableA || playerA === BASELINE_NAME ? 0 : kFactor(duelsA);
+  const kB = !mutableB || playerB === BASELINE_NAME ? 0 : kFactor(duelsB);
 
   const newA = ratingA + kA * (scoreA - expectedA);
   const newB = ratingB + kB * (scoreB - expectedB);
 
-  // Persist (baseline stays fixed at SEED_ELO)
+  // Persist only for mutable, non-baseline sides. Duel counter bumps for
+  // mutable sides too — "how many times you were rated" is a meaningful count,
+  // including ties with delta=0.
   if (redis) {
-    if (playerA !== BASELINE_NAME) {
+    if (mutableA && playerA !== BASELINE_NAME) {
       await redis.hset(`elo:${playerA.toLowerCase()}`, { [scenarioId]: newA });
       await redis.hincrby(`duels:${playerA.toLowerCase()}`, scenarioId, 1);
     }
-    if (playerB !== BASELINE_NAME) {
+    if (mutableB && playerB !== BASELINE_NAME) {
       await redis.hset(`elo:${playerB.toLowerCase()}`, { [scenarioId]: newB });
       await redis.hincrby(`duels:${playerB.toLowerCase()}`, scenarioId, 1);
     }
-    // Recompute combined Elo for each non-baseline player (average across scenarios played)
-    if (playerA !== BASELINE_NAME) await recomputeCombined(redis, playerA);
-    if (playerB !== BASELINE_NAME) await recomputeCombined(redis, playerB);
+    if (mutableA && playerA !== BASELINE_NAME) await recomputeCombined(redis, playerA);
+    if (mutableB && playerB !== BASELINE_NAME) await recomputeCombined(redis, playerB);
   }
 
   return {

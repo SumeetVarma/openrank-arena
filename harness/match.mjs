@@ -87,11 +87,12 @@ if (entrants.length < 2) {
 const incumbentSlugs = new Set(scenario.incumbents.map((i) => i.slug));
 const incumbentByName = new Map(scenario.incumbents.map((i) => [i.slug, i.name]));
 
-const resolvedEntrants = entrants.map((name) => {
+const resolvedEntrants = await Promise.all(entrants.map(async (name) => {
   if (name === "baseline") {
     return {
       ref: name,
       kind: "baseline",
+      version: null,
       displayName: scenario.underdog.name,
       url: `${baseUrl}/baseline/${scenarioId}`
     };
@@ -100,17 +101,31 @@ const resolvedEntrants = entrants.map((name) => {
     return {
       ref: name,
       kind: "incumbent",
+      version: null,
       displayName: incumbentByName.get(name),
       url: `${baseUrl}/incumbents/${scenarioId}/${name}`
     };
   }
+  // Player: pin to their latest submission version so the match record is
+  // reproducible. /api/match REQUIRES entrantVersions for player kind.
+  let version = null;
+  try {
+    const res = await fetch(`${baseUrl}/api/players?scenario=${scenarioId}&name=${encodeURIComponent(name)}`);
+    if (res.ok) {
+      const data = await res.json();
+      version = data.latestVersion || null;
+    }
+  } catch {}
   return {
     ref: name,
     kind: "player",
-    displayName: scenario.underdog.name, // players use the same brand
-    url: `${baseUrl}/players/${name}/${scenarioId}`
+    version,
+    displayName: scenario.underdog.name,
+    url: version
+      ? `${baseUrl}/players/${name}/${scenarioId}/v/${version}`
+      : `${baseUrl}/players/${name}/${scenarioId}`
   };
-});
+}));
 
 console.log(`\n📍 Scenario: ${scenario.label}`);
 console.log(`💬 Buyer asks: "${scenario.buyerQuery}"`);
@@ -177,6 +192,9 @@ if (!skipSync) {
         scenarioId,
         ranking: refRanking,
         entrantKinds: Object.fromEntries(resolvedEntrants.map((e) => [e.ref, e.kind])),
+        entrantVersions: Object.fromEntries(
+          resolvedEntrants.filter((e) => e.kind === "player" && e.version).map((e) => [e.ref, e.version])
+        ),
         model,
         rationale: parsed.rationale || "",
         signals: parsed.signals_compared || [],

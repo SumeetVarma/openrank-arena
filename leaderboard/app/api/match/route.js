@@ -2,20 +2,19 @@
 // updates from the ordering, persist the match log.
 //
 // Entrants can be any mix of: players, "baseline", or incumbent slugs.
-// We only update Elo for players and baseline (incumbents are fixed market
-// fixtures — they don't have Elo records of their own).
+// Mutable sides (ratings can move): players. Fixed sides: baseline + incumbents.
 //
 // Reliability guards on this endpoint:
-//   1. Every player entrant must be pinned to a specific submission version
+//   1. entrantKinds must be specified explicitly for every ranked entrant.
+//      Unknown / missing kinds are rejected.
+//   2. Every player entrant must be pinned to a specific submission version
 //      (entrantVersions) so the match record is reproducible.
-//   2. Every player entrant must have a current submission for the scenario
-//      (anti-orphan).
-//   3. No duplicate entrants in the ranking — exception: explicit ties in
-//      the optional `ties` array.
-//   4. Idempotent on (scenario, sorted entrant versions): if a match for the
-//      same fingerprint already exists, this re-judgment is logged for
-//      transparency but does NOT update Elo. Re-judging unchanged content
-//      shouldn't compound Elo — submit a new version to earn more.
+//   3. Every player entrant must have a current submission for the scenario.
+//   4. No duplicate entrants in the ranking — period. To indicate a tie, list
+//      each entrant once in `ranking` AND include the tied group in `ties`.
+//   5. Atomic idempotency on (scenario, sorted unique entrants, kinds, versions):
+//      first writer wins the fingerprint key via SET NX; subsequent identical
+//      matchups log as replay:true with NO Elo movement.
 
 import { Redis } from "@upstash/redis";
 import { applyDuel, BASELINE_NAME } from "../../../lib/elo.mjs";
@@ -31,6 +30,8 @@ const redis = HAS_KV
       token: process.env.KV_REST_API_TOKEN
     })
   : null;
+
+const VALID_KINDS = new Set(["player", "baseline", "incumbent"]);
 
 export async function POST(request) {
   let payload;
@@ -63,22 +64,44 @@ export async function POST(request) {
     return json({ ok: false, error: "Need a ranking with at least 2 entrants" }, 400);
   }
 
-  // Validate the ranking. Duplicates are only allowed if they appear in the
-  // `ties` array (which is a list of arrays of entrant labels that tied).
-  const tieGroups = Array.isArray(ties) ? ties.filter((g) => Array.isArray(g) && g.length >= 2) : [];
-  const tiedSet = new Set(tieGroups.flat());
+  // STRICT: no duplicate entrants in ranking. Ties are expressed via the
+  // optional `ties: [["a","b"], ...]` array, which references entrants that
+  // each appear ONCE in ranking. ranking is otherwise a strict permutation.
   const seen = new Set();
   for (const ref of ranking) {
     if (typeof ref !== "string" || !ref.trim()) {
       return json({ ok: false, error: `Ranking entry must be a non-empty string, got ${JSON.stringify(ref)}` }, 400);
     }
-    if (seen.has(ref) && !tiedSet.has(ref)) {
+    if (seen.has(ref)) {
       return json({
         ok: false,
-        error: `Duplicate entrant "${ref}" in ranking. To indicate a tie, list each entrant once in ranking AND include the tied pair/group in the optional "ties": [["a","b"], ...] array.`
+        error: `Duplicate entrant "${ref}" in ranking. List each entrant once; use the "ties": [["a","b"], ...] field to mark same-position groups.`
       }, 400);
     }
     seen.add(ref);
+  }
+
+  // Validate the ties payload references only entrants in ranking and has
+  // groups of at least 2. Duplicates within a single group are noise — dedup.
+  const tieGroups = [];
+  if (Array.isArray(ties)) {
+    for (const rawGroup of ties) {
+      if (!Array.isArray(rawGroup)) continue;
+      const group = [...new Set(rawGroup.filter((g) => typeof g === "string" && seen.has(g)))];
+      if (group.length >= 2) tieGroups.push(group);
+    }
+  }
+
+  // STRICT: entrantKinds must be specified for every ranked entrant and be a
+  // valid kind. No label-based guessing at the API boundary.
+  for (const ref of ranking) {
+    const kind = entrantKinds[ref];
+    if (!VALID_KINDS.has(kind)) {
+      return json({
+        ok: false,
+        error: `entrantKinds["${ref}"] must be one of ${[...VALID_KINDS].join(" | ")}; got ${JSON.stringify(kind)}`
+      }, 400);
+    }
   }
 
   // Reproducibility: every player entrant in the ranking MUST be pinned to a
@@ -106,32 +129,16 @@ export async function POST(request) {
     }
   }
 
-  // Idempotency fingerprint: same scenario + same sorted entrant labels +
-  // same versions = same matchup. If we've already paid out Elo for this
-  // exact tuple, this re-judgment is a replay and gets logged WITHOUT
-  // moving Elo.
-  const fingerprint = buildFingerprint({ scenarioId, ranking, entrantVersions, entrantKinds });
-  let alreadyJudged = false;
-  if (redis) {
-    const prior = await redis.get(`match:fingerprint:${fingerprint}`);
-    if (prior) alreadyJudged = true;
-  }
-
-  // Ensure player records exist for any 'player' kind entrants
+  // Ensure player records exist for any 'player' kind entrants.
   for (const ref of ranking) {
     if (entrantKinds[ref] === "player") {
       await ensurePlayer({ name: ref });
     }
   }
 
-  const eligible = (ref) =>
-    entrantKinds[ref] === "player" || ref === BASELINE_NAME || entrantKinds[ref] === "baseline";
-
-  // Build a tie-aware position map: same position = tied, lower index = higher rank.
-  // Default: every entrant in ranking gets its index as its position.
+  // Position map for tie-aware pairwise outcomes.
   const positionOf = new Map();
   ranking.forEach((ref, i) => positionOf.set(ref, i));
-  // For each tie group, snap all members to the position of the highest-ranked one.
   for (const group of tieGroups) {
     const positions = group.map((g) => positionOf.get(g)).filter((p) => p !== undefined);
     if (!positions.length) continue;
@@ -141,17 +148,38 @@ export async function POST(request) {
     }
   }
 
+  // Atomic idempotency claim: SET NX with a recoverable matchId. If another
+  // identical-fingerprint match already exists, we'll write THIS request as
+  // a replay (no Elo) but still log it for transparency.
+  const fingerprint = buildFingerprint({ scenarioId, ranking, entrantVersions, entrantKinds });
+  const matchId = newRunId();
+  let isReplay = false;
+  let priorMatchId = null;
+  if (redis) {
+    // Upstash: SET with NX flag = only-if-not-exists
+    const claimed = await redis.set(`match:fingerprint:${fingerprint}`, matchId, { nx: true });
+    if (!claimed) {
+      isReplay = true;
+      priorMatchId = await redis.get(`match:fingerprint:${fingerprint}`);
+    }
+  }
+
+  // A side is "mutable" (its Elo can move) only when entrantKinds says "player".
+  // Baselines and incumbents are fixed fixtures — their ratings are pegged.
+  const mutable = (ref) => entrantKinds[ref] === "player";
+
   const eloChanges = {};
 
-  if (!alreadyJudged) {
+  if (!isReplay) {
     // For each unordered pair, apply Elo based on relative position.
-    // Skip pure-incumbent and pure-baseline-vs-baseline pairs (no Elo state to move).
+    // Skip pairs where neither side is mutable — no Elo state to move.
     for (let i = 0; i < ranking.length; i++) {
       for (let j = i + 1; j < ranking.length; j++) {
         const a = ranking[i];
         const b = ranking[j];
-        if (a === b) continue;
-        if (!eligible(a) && !eligible(b)) continue;
+        const mA = mutable(a);
+        const mB = mutable(b);
+        if (!mA && !mB) continue;
 
         const posA = positionOf.get(a);
         const posB = positionOf.get(b);
@@ -165,7 +193,9 @@ export async function POST(request) {
           scenarioId,
           playerA: a,
           playerB: b,
-          outcome
+          outcome,
+          mutableA: mA,
+          mutableB: mB
         });
         for (const [p, change] of Object.entries(result)) {
           if (!eloChanges[p]) {
@@ -179,7 +209,6 @@ export async function POST(request) {
     }
   }
 
-  const matchId = newRunId();
   const record = {
     matchId,
     scenarioId,
@@ -193,7 +222,8 @@ export async function POST(request) {
     runner: String(runner || "anonymous").slice(0, 120),
     ranAt: new Date().toISOString(),
     elo: eloChanges,
-    replay: alreadyJudged,
+    replay: isReplay,
+    priorMatchId,
     fingerprint
   };
 
@@ -201,21 +231,16 @@ export async function POST(request) {
     await redis.set(`match:${scenarioId}:${matchId}`, record);
     await redis.lpush(`matches:${scenarioId}:recent`, matchId);
     await redis.ltrim(`matches:${scenarioId}:recent`, 0, 199);
-    // First time we see this fingerprint, claim it so future re-judgments
-    // of identical content land as replays.
-    if (!alreadyJudged) {
-      await redis.set(`match:fingerprint:${fingerprint}`, matchId);
-    }
   }
 
-  return json({ ok: true, matchId, elo: eloChanges, replay: alreadyJudged });
+  return json({ ok: true, matchId, elo: eloChanges, replay: isReplay, priorMatchId });
 }
 
 function buildFingerprint({ scenarioId, ranking, entrantVersions, entrantKinds }) {
-  // Sort entrants alphabetically so the order doesn't matter — what matters
-  // is "who was on this matchup with what content."
+  // Order-agnostic fingerprint over the matchup IDENTITY (which pages were on
+  // the table), not the outcome. Sorted alphabetically so [a,b] == [b,a].
   const parts = [...new Set(ranking)].sort().map((ref) => {
-    const kind = entrantKinds[ref] || (ref === "baseline" ? "baseline" : "player");
+    const kind = entrantKinds[ref];
     const v = entrantVersions[ref] || "";
     return `${ref}|${kind}|${v}`;
   });
