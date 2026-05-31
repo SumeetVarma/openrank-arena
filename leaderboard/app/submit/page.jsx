@@ -28,7 +28,7 @@ export default function SubmitPage() {
               Upload your <span className="acc">page</span>.
             </h1>
             <p className="submitLede">
-              Zip → upload → live. First upload registers your name. Every upload is a new version. Latest version is what duels.
+              Zip → upload → live. First upload registers your name. Every upload is a new version. Latest version is what plays.
             </p>
 
             <form

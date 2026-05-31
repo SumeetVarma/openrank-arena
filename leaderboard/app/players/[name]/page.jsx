@@ -140,7 +140,7 @@ export default async function PlayerProfile({ params }) {
               <p className="eyebrow">Submissions</p>
               <h2>Across the three scenarios.</h2>
             </div>
-            <span className="sectionMeta">Latest version is what duels</span>
+            <span className="sectionMeta">Latest version is what plays</span>
           </div>
 
           <div className="scenarioStack">
@@ -227,7 +227,7 @@ export default async function PlayerProfile({ params }) {
                         marginTop: 4
                       }}
                     >
-                      {duels === 0 ? "unranked" : `${duels} duel${duels === 1 ? "" : "s"}`}
+                      {duels === 0 ? "unranked" : `${duels} match${duels === 1 ? "" : "es"}`}
                     </div>
                   </div>
                   {versions.length > 1 && (
