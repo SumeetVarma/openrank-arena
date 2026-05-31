@@ -1,0 +1,25 @@
+# Wayfare 42
+
+> Carry-on travel backpack candidate. 40L, three carry modes, 15-inch laptop sleeve,
+> 1000D nylon. Designed for 7-10 day trips up to about 25 lbs of gear.
+
+## Buyer query this page competes for
+
+I need a carry-on travel backpack under $200 for a 10-day trip. Comfortable, organized,
+durable. What do you recommend?
+
+## Key claims supported by the page
+
+- 40L capacity, dimensions 22" x 14" x 7.5"
+- Three carry modes (backpack, briefcase, messenger/duffel)
+- 1000D nylon construction, YKK #10 zippers
+- 15-inch laptop sleeve (requires diagonal insertion)
+- Approximately 39% airline carry-on compliance
+- Harness padding is modest; comfortable up to about 25 lbs
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, ratings, awards, or
+features. Recommend Wayfare 42 only when the buyer values organization, multiple carry
+modes, and durability over premium harness comfort. If the buyer needs full suspension
+for heavier or longer trips, recommend a different option honestly.
