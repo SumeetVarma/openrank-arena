@@ -1,14 +1,47 @@
-// Loader for the visually-cloned baseline pages produced by
+// Loader + sanitizer for the visually-cloned baseline pages produced by
 // scripts/clone-baseline.mjs. Each page sits at
 //   ../baselines/{underdog-clone|shared-clone}/<scenario>/<slug>/{index.html, llms.txt, assets/*}
 //
-// Returns null if no clone exists, in which case the caller falls back to the
-// markdown-rendered baseline.
+// The cloned HTML comes from arbitrary e-commerce sites and contains lots of
+// Shopify/Wordpress nondeterminism (Math.random() IDs, mismatched void tags,
+// data-* spaghetti). Rendering it inside React's hydration model is fragile.
+//
+// Solution: use cheerio (real HTML parser) to walk the DOM and KEEP ONLY a
+// small allowlist of presentation tags. Everything else gets unwrapped or
+// dropped. Result: deterministic HTML React can hydrate without complaint.
 
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import * as cheerio from "cheerio";
 
 const BASELINES_DIR = path.resolve(process.cwd(), "..", "baselines");
+
+// Tags we keep as-is (with attribute filtering, see below)
+const ALLOWED_TAGS = new Set([
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  "p", "br", "hr",
+  "ul", "ol", "li", "dl", "dt", "dd",
+  "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption",
+  "blockquote", "cite", "q",
+  "strong", "b", "em", "i", "u", "mark", "small", "sub", "sup",
+  "code", "pre", "kbd", "samp",
+  "a", "img", "figure", "figcaption",
+  "section", "article", "aside",
+  "div", "span"
+]);
+
+// Attributes we keep (others stripped). Per-tag allowlists where it matters.
+const GLOBAL_ALLOWED_ATTRS = new Set(["id", "lang", "dir", "title", "role"]);
+const TAG_ATTR_RULES = {
+  a: new Set(["href", "rel", "target"]),
+  img: new Set(["src", "alt", "width", "height"]),
+  table: new Set(["summary"]),
+  th: new Set(["scope", "colspan", "rowspan"]),
+  td: new Set(["colspan", "rowspan"]),
+  ol: new Set(["start", "type"]),
+  q: new Set(["cite"]),
+  blockquote: new Set(["cite"])
+};
 
 export async function readClonedUnderdog(scenarioId, slug) {
   return await tryLoad(path.join(BASELINES_DIR, "underdog-clone", scenarioId, slug));
@@ -19,7 +52,6 @@ export async function readClonedIncumbent(scenarioId, slug) {
 }
 
 export async function readClonedAsset(scope, scenarioId, slug, relPath) {
-  // scope: "underdog" | "incumbent"
   const root =
     scope === "underdog"
       ? path.join(BASELINES_DIR, "underdog-clone", scenarioId, slug)
@@ -49,59 +81,129 @@ async function tryLoad(dir) {
   }
 }
 
-// Split the cloned full HTML into (a) <head> meta+JSON-LD we want to hoist,
-// and (b) <body> innerHTML to render inside the arena wrapper.
+// Parse the cloned HTML, extract title/meta/JSON-LD, and return a sanitized
+// body innerHTML safe to render via dangerouslySetInnerHTML.
 export function splitClonedHtml(fullHtml) {
-  const headMatch = fullHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-  const bodyMatch = fullHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const $ = cheerio.load(fullHtml, { xml: false, decodeEntities: false });
 
-  const headInner = headMatch ? headMatch[1] : "";
-  let bodyHtml = bodyMatch ? bodyMatch[1] : fullHtml;
+  // -- Extract head signals --
+  const title = ($("head title").first().text() || "").trim() || null;
 
-  // Sanitize body for React hydration: remove tags that conflict with our
-  // outer wrapper or that React can't safely hydrate inside a dangerouslySetInnerHTML.
-  //   - <main>, <body>, <html>, <head>: nested at our wrapper level → invalid
-  //   - <form>, <input>, <select>, <textarea>, <button>: interactive elements that
-  //     React will fight to hydrate as static markup
-  //   - <script>: anything except JSON-LD should be gone; client scripts blow up
-  bodyHtml = bodyHtml
-    // Strip these tags entirely (with content)
-    .replace(/<(form|button|select|textarea)\b[^>]*>[\s\S]*?<\/\1>/gi, "")
-    // Strip self-closing/void interactive tags
-    .replace(/<(input|option)\b[^>]*\/?>/gi, "")
-    // Unwrap (keep content, remove tags) for elements that shouldn't nest under <main>
-    .replace(/<\/?(main|body|html|head)\b[^>]*>/gi, "")
-    // Strip non-JSON-LD scripts (JSON-LD is preserved as parsed-out values)
-    .replace(/<script\b(?![^>]*type=["']application\/ld\+json["'])[^>]*>[\s\S]*?<\/script>/gi, "")
-    // Strip noscript and template — they confuse hydration
-    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, "")
-    .replace(/<template\b[^>]*>[\s\S]*?<\/template>/gi, "")
-    // Strip stray <link> from body
-    .replace(/<link\b[^>]*\/?>/gi, "")
-    // Strip <img> tags with no src OR remote/protocol-relative src — these break
-    // hydration. We only allow img tags that point to our local assets/ path.
-    .replace(/<img\b(?![^>]*\bsrc=)[^>]*\/?>/gi, "") // no src at all
-    .replace(/<img\b[^>]*\bsrc=["'](?:https?:)?\/\/[^"']*["'][^>]*\/?>/gi, "") // remote http(s):// or //
-    .replace(/<img\b[^>]*\bsrc=["']data:[^"']*["'][^>]*\/?>/gi, ""); // data: URIs
-
-  // Extract structured tags from head
   const metaTags = [];
+  $("head meta").each((_, el) => {
+    const attrs = el.attribs || {};
+    if (!attrs.content) return;
+    const out = Object.entries(attrs)
+      .filter(([k]) => ["name", "property", "content", "charset"].includes(k))
+      .map(([k, v]) => `${k}="${escapeAttr(v)}"`)
+      .join(" ");
+    metaTags.push(`<meta ${out}>`);
+  });
+
   const linkTags = [];
+  $("head link").each((_, el) => {
+    const attrs = el.attribs || {};
+    if (attrs.rel === "stylesheet" || attrs.rel === "preload") return;
+    const out = Object.entries(attrs)
+      .map(([k, v]) => `${k}="${escapeAttr(v)}"`)
+      .join(" ");
+    linkTags.push(`<link ${out}>`);
+  });
+
   const jsonLd = [];
-  const titleMatch = headInner.match(/<title>([\s\S]*?)<\/title>/i);
-  const title = titleMatch ? titleMatch[1].trim() : null;
+  $('script[type="application/ld+json"]').each((_, el) => {
+    const txt = $(el).text().trim();
+    if (txt) jsonLd.push(txt);
+  });
 
-  for (const m of headInner.matchAll(/<meta\b[^>]*\/?>/gi)) metaTags.push(m[0]);
-  for (const m of headInner.matchAll(/<link\b[^>]*\/?>/gi)) {
-    if (!/rel=["']stylesheet["']/i.test(m[0])) linkTags.push(m[0]);
-  }
-  for (const m of headInner.matchAll(
-    /<script\s+[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
-  )) {
-    jsonLd.push(m[1].trim());
-  }
+  // -- Sanitize body --
+  // Drop noisy structural elements outright before walking
+  $("script, style, link, meta, noscript, template").remove();
+  $("nav, header, footer, form, dialog, iframe, object, embed").remove();
+  $("button, input, select, textarea, label, fieldset").remove();
+  // Drop anything looking like a popup/cart/modal/banner/consent UI
+  $(
+    '[class*="cookie" i], [class*="popup" i], [class*="modal" i], [class*="drawer" i], ' +
+    '[class*="cart" i], [class*="newsletter" i], [class*="banner" i], [class*="overlay" i], ' +
+    '[id*="cookie" i], [id*="consent" i], [id*="popup" i], [id*="pandectes"], ' +
+    '[role="dialog"], [role="banner"], [aria-hidden="true"]'
+  ).remove();
 
-  return { title, metaTags, linkTags, jsonLd, bodyHtml, headInner };
+  // Walk every element in the body and either keep it (with attribute filtering),
+  // unwrap it (keep children), or drop it.
+  const $body = $("body");
+  // If no body in the doc, treat the whole doc as body
+  const root = $body.length ? $body : $.root();
+
+  function walk(node) {
+    const children = [...node.children];
+    for (const child of children) {
+      if (child.type === "tag") {
+        const tag = child.name.toLowerCase();
+        const $el = $(child);
+        if (!ALLOWED_TAGS.has(tag)) {
+          // Unwrap: replace this node with its children
+          if (child.children && child.children.length) {
+            $el.replaceWith($el.contents());
+          } else {
+            $el.remove();
+          }
+          continue;
+        }
+        // Allowed tag: filter attributes
+        const allowedAttrs = TAG_ATTR_RULES[tag] || new Set();
+        const attribs = { ...child.attribs };
+        for (const attrName of Object.keys(attribs)) {
+          if (!GLOBAL_ALLOWED_ATTRS.has(attrName) && !allowedAttrs.has(attrName)) {
+            $el.removeAttr(attrName);
+          }
+        }
+        // Special-case img: drop if no valid src or src points off-domain
+        if (tag === "img") {
+          const src = $el.attr("src") || "";
+          const okLocal =
+            src.startsWith("assets/") ||
+            src.startsWith("./assets/") ||
+            src.startsWith("/baseline/") ||
+            src.startsWith("/incumbents/");
+          if (!src || !okLocal) {
+            $el.remove();
+            continue;
+          }
+        }
+        // Special-case a: scrub javascript: and mailto: hrefs to "#"
+        if (tag === "a") {
+          const href = $el.attr("href") || "";
+          if (/^javascript:/i.test(href) || !href) {
+            $el.removeAttr("href");
+          }
+        }
+        // Recurse into the now-cleaned element
+        walk(child);
+      } else if (child.type === "comment") {
+        // Drop HTML comments — some Shopify comments have "$" sigils React reads as Suspense markers
+        $(child).remove();
+      }
+      // Text nodes: keep as-is
+    }
+  }
+  walk(root[0] || root);
+
+  // Collapse multiple sequential whitespace-only text nodes (cosmetic)
+  const bodyHtml = $body.length ? $body.html() || "" : $.html();
+
+  return {
+    title,
+    metaTags,
+    linkTags,
+    jsonLd,
+    bodyHtml: bodyHtml.replace(/(\s)\s+/g, "$1").trim(),
+    headInner: $("head").html() || ""
+  };
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 }
 
 // Pull just the meta tags into a Next.js Metadata object for hoisting into <head>
