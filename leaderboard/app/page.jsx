@@ -318,11 +318,9 @@ export default async function Page() {
           <div className="featureRow">
             {scenarioCards.map(({ scenario, heroImage }) => {
               return (
-                <a
+                <div
                   key={scenario.id}
-                  href={`/baseline/${scenario.id}`}
                   className={`featureCard scenario--${scenario.id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div className="featureImage">
                     {heroImage ? (
@@ -358,13 +356,13 @@ export default async function Page() {
                       &ldquo;{scenario.buyerQuery.length > 95 ? scenario.buyerQuery.slice(0, 95) + "…" : scenario.buyerQuery}&rdquo;
                     </p>
                     <div className="featureActions">
-                      <span className="tlink" style={{ pointerEvents: "none" }}>View baseline →</span>
-                      <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--ink-mute)" }}>
-                        starter.zip available
-                      </span>
+                      <a className="tlink" href={`/baseline/${scenario.id}`}>View baseline →</a>
+                      <a className="tlink featureStarter" href={`/baseline/${scenario.id}/starter.zip`} download>
+                        ↓ starter.zip
+                      </a>
                     </div>
                   </div>
-                </a>
+                </div>
               );
             })}
           </div>

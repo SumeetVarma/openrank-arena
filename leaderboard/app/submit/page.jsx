@@ -100,7 +100,21 @@ export default function SubmitPage() {
           {/* ── Right column: zip anatomy + CLI ── */}
           <aside className="submitSide">
             <div className="zipPanel">
-              <p className="zipPanelTitle">What goes in the zip</p>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
+                <p className="zipPanelTitle" style={{ margin: 0 }}>What goes in the zip</p>
+                <details className="starterDownloads">
+                  <summary>Start from a template ↓</summary>
+                  <ul>
+                    {scenarioList.map((s) => (
+                      <li key={s.id}>
+                        <a href={`/baseline/${s.id}/starter.zip`} download>
+                          {s.shortLabel}<span className="mono"> starter.zip</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </div>
               <ul className="zipList">
                 <li>
                   <code>index.html</code>

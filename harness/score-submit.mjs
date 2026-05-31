@@ -17,12 +17,18 @@
 //     "scenarioId": "carryon",
 //     "ranking": ["alice", "baseline"],
 //     "entrantKinds": { "alice": "player", "baseline": "baseline" },
+//     "entrantVersions": { "alice": "01e197da" },   // REQUIRED for every player entrant
 //     "rationale": "Alice was tighter on specs and didn't fabricate reviews.",
 //     "signals": [
 //       { "signal": "concrete_specifics", "best": "A", "worst": "B" }
 //     ],
 //     "model": "claude-code-in-the-loop"
 //   }
+//
+// entrantVersions pins each player entrant to a specific submission version
+// so the match record is reproducible. Baselines and incumbents don't need a
+// pin (they don't change). If you don't know a player's version, query
+// /api/players?name=<n>&scenario=<s> — the response includes latestVersion.
 //
 // The shared password defaults to `WANNABE_FOUNDERS` (the same default the
 // /api/match route accepts). Override with ARENA_SHARED_PASSWORD if your
@@ -59,14 +65,31 @@ if (args.result) {
   for (const r of ranking) {
     if (!kinds[r]) kinds[r] = r === "baseline" ? "baseline" : "player";
   }
+  const versions = {};
+  if (args.versions) {
+    for (const pair of String(args.versions).split(",")) {
+      const [k, v] = pair.split("=").map((s) => s.trim());
+      if (k && v) versions[k] = v;
+    }
+  }
   body = {
     scenarioId: args.scenario,
     ranking,
     entrantKinds: kinds,
+    entrantVersions: versions,
     rationale: args.rationale || "",
     model: args.model || "manual",
     signals: []
   };
+}
+
+// Reproducibility: every player entrant must be pinned to a specific version.
+const versions = body.entrantVersions || {};
+for (const ref of body.ranking || []) {
+  if (body.entrantKinds?.[ref] === "player" && !versions[ref]) {
+    fail(`Missing entrantVersions["${ref}"] — every player entrant must be pinned to a submission version id. ` +
+      `Query https://openrank-arena.vercel.app/api/players?scenario=${body.scenarioId}&name=${ref} for the latest version, or pass --versions ${ref}=<id>.`);
+  }
 }
 
 // Required fields check

@@ -2944,6 +2944,81 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
   100% { opacity: 0; transform: scale(1.08); }
 }
 
+/* Scenario card: starter.zip download chip */
+.featureStarter {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  padding: 3px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.featureStarter:hover {
+  background: var(--ink);
+  color: var(--paper-light);
+  border-color: var(--ink);
+}
+
+/* Submit-page starter dropdown */
+.starterDownloads {
+  position: relative;
+}
+.starterDownloads > summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.starterDownloads > summary::-webkit-details-marker { display: none; }
+.starterDownloads > summary:hover { color: var(--ember); border-color: var(--ember-soft); }
+.starterDownloads[open] > summary {
+  color: var(--ember);
+  border-color: var(--ember-soft);
+}
+.starterDownloads ul {
+  position: absolute;
+  right: 0;
+  margin-top: 8px;
+  list-style: none;
+  padding: 6px;
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px -16px rgba(40, 30, 20, 0.25);
+  min-width: 220px;
+  z-index: 20;
+}
+.starterDownloads li { margin: 0; }
+.starterDownloads li a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 14px;
+  transition: background 120ms ease;
+}
+.starterDownloads li a:hover { background: var(--paper-deep); }
+.starterDownloads li a .mono {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-mute);
+}
+
 /* ──────────────────────────────────────────────────────────────
    Prize board
    ────────────────────────────────────────────────────────────── */

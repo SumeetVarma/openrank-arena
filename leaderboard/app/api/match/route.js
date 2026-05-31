@@ -33,6 +33,7 @@ export async function POST(request) {
     scenarioId,
     ranking,
     entrantKinds = {},
+    entrantVersions = {},
     model,
     rationale,
     signals,
@@ -47,6 +48,17 @@ export async function POST(request) {
   if (!scenarios[scenarioId]) return json({ ok: false, error: "Unknown scenario" }, 400);
   if (!Array.isArray(ranking) || ranking.length < 2) {
     return json({ ok: false, error: "Need a ranking with at least 2 entrants" }, 400);
+  }
+  // Reproducibility: every player entrant in the ranking MUST be pinned to a
+  // specific submission version. Otherwise a later re-submission would
+  // silently change what "the judge saw" for this match record.
+  for (const ref of ranking) {
+    if (entrantKinds[ref] === "player" && !entrantVersions[ref]) {
+      return json({
+        ok: false,
+        error: `Missing entrantVersions["${ref}"] — every player entrant must be pinned to a submission version id`
+      }, 400);
+    }
   }
 
   // Ensure player records exist for any 'player' kind entrants
@@ -95,6 +107,7 @@ export async function POST(request) {
     scenarioId,
     ranking,
     entrantKinds,
+    entrantVersions,
     model,
     rationale: String(rationale || "").slice(0, 800),
     signals: signals || [],
