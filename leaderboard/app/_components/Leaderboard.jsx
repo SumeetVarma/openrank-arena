@@ -104,11 +104,14 @@ export default function Leaderboard({ rows, scenarios }) {
                   if (v == null) {
                     return <td key={s.id} className={cellClass}>—</td>;
                   }
+                  const version = row.latestVersions?.[s.id];
                   const href = isBaseline
                     ? `/baseline/${s.id}`
-                    : d > 0
-                      ? `/players/${row.player}/${s.id}`
-                      : null;
+                    : d > 0 && version
+                      ? `/players/${row.player}/${s.id}/v/${version}`
+                      : d > 0
+                        ? `/players/${row.player}/${s.id}`
+                        : null;
                   return (
                     <td key={s.id} className={cellClass}>
                       {href ? (

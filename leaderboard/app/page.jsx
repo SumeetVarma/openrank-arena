@@ -4,7 +4,8 @@ import { Redis } from "@upstash/redis";
 import { scenarioList } from "../lib/scenarios.mjs";
 import {
   listPlayers,
-  listLatestSubmissionsForScenario
+  listLatestSubmissionsForScenario,
+  getLatestSubmission
 } from "../lib/storage.mjs";
 import {
   getLeaderboard,
@@ -127,20 +128,23 @@ export default async function Page() {
     players.map(async (p) => {
       const perScenario = {};
       const duels = {};
+      const latestVersions = {};
       let sum = 0;
       let played = 0;
       for (const s of scenarioList) {
         const elo = await getEloFor(redis, p.name, s.id);
         const d = await getDuelsFor(redis, p.name, s.id);
+        const latest = await getLatestSubmission(p.name, s.id);
         perScenario[s.id] = elo;
         duels[s.id] = d;
+        latestVersions[s.id] = latest?.version || null;
         if (d > 0) {
           sum += elo;
           played += 1;
         }
       }
       const overall = played > 0 ? sum / played : SEED_ELO;
-      return { player: p.name, overall, perScenario, duels };
+      return { player: p.name, overall, perScenario, duels, latestVersions };
     })
   );
   // Add baseline row
@@ -148,7 +152,8 @@ export default async function Page() {
     player: BASELINE_NAME,
     overall: SEED_ELO,
     perScenario: Object.fromEntries(scenarioList.map((s) => [s.id, SEED_ELO])),
-    duels: Object.fromEntries(scenarioList.map((s) => [s.id, Infinity]))
+    duels: Object.fromEntries(scenarioList.map((s) => [s.id, Infinity])),
+    latestVersions: {}
   };
   const tableRows = [...rows, baselineRow];
 
@@ -333,47 +338,73 @@ export default async function Page() {
             <span className="sectionMeta">brand-spoofed clones of real pages ranked #10 in Search</span>
           </div>
           <div className="featureRow">
-            {scenarioCards.map(({ scenario, heroImage }) => {
+            {scenarioCards.map(({ scenario, heroImage, submissions }, idx) => {
+              const playerCount = submissions?.length || 0;
+              // Top Elo holder for this scenario (excluding baseline + unranked)
+              const scenarioRow = tableRows
+                .filter((r) => r.player !== BASELINE_NAME && (r.duels?.[scenario.id] ?? 0) > 0)
+                .map((r) => ({ player: r.player, elo: r.perScenario[scenario.id] || SEED_ELO }))
+                .sort((a, b) => b.elo - a.elo)[0];
               return (
                 <div
                   key={scenario.id}
                   className={`featureCard scenario--${scenario.id}`}
                 >
                   <div className="featureImage">
+                    <span className="featureNum" aria-hidden>{String(idx + 1).padStart(2, "0")}</span>
                     {heroImage ? (
                       <img src={heroImage} alt={`${scenario.underdog.name} baseline`} loading="lazy" />
                     ) : (
-                      <div style={{
-                        width: "100%",
-                        height: "100%",
-                        display: "grid",
-                        placeItems: "center",
-                        background: "var(--paper-deep)",
-                        color: "var(--ink-mute)"
-                      }}>
-                        <span style={{
-                          fontFamily: "var(--font-display)",
-                          fontStyle: "italic",
-                          fontSize: 52,
-                          letterSpacing: "-0.02em",
-                          fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 1",
-                          textAlign: "center",
-                          padding: "0 20px"
-                        }}>
-                          {scenario.underdog.name}
-                        </span>
+                      <div className="featureImageFallback">
+                        <span>{scenario.underdog.name}</span>
                       </div>
                     )}
+                    <div className="featureImageOverlay">
+                      <span className="featureCategory">{scenario.category}</span>
+                    </div>
                   </div>
                   <div className="featureBody">
-                    <p className="featureCategory">{scenario.category}</p>
-                    <h3>{scenario.underdog.name}</h3>
-                    <p className="featureVs">vs {scenario.incumbents.map((i) => i.name).join(" · ")}</p>
-                    <p className="featureBuyer">
-                      &ldquo;{scenario.buyerQuery.length > 95 ? scenario.buyerQuery.slice(0, 95) + "…" : scenario.buyerQuery}&rdquo;
+                    <h3 className="featureTitle">
+                      {scenario.underdog.name}
+                      <span className="featureUnderdog" aria-label="underdog rank">#10</span>
+                    </h3>
+                    <p className="featureVs">
+                      <span className="featureVsLabel">vs</span>
+                      {scenario.incumbents.map((i, k) => (
+                        <span key={i.slug} className="featureVsName">
+                          {i.name}{k < scenario.incumbents.length - 1 ? " · " : ""}
+                        </span>
+                      ))}
                     </p>
+                    <p className="featureBuyer">
+                      <span className="featureBuyerOpen" aria-hidden>&ldquo;</span>
+                      {scenario.buyerQuery.length > 110 ? scenario.buyerQuery.slice(0, 110).trim() + "…" : scenario.buyerQuery}
+                    </p>
+
+                    <dl className="featureStats">
+                      <div>
+                        <dt>Top</dt>
+                        <dd className="tnum">
+                          {scenarioRow ? (
+                            <>
+                              <span className="featureTopName">{scenarioRow.player}</span>
+                              <span className="featureTopElo">{Math.round(scenarioRow.elo)}</span>
+                            </>
+                          ) : (
+                            <span className="featureNobody">— nobody yet —</span>
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Players</dt>
+                        <dd className="tnum">{playerCount}</dd>
+                      </div>
+                    </dl>
+
                     <div className="featureActions">
-                      <a className="tlink" href={`/baseline/${scenario.id}`}>View baseline →</a>
+                      <a className="btn btn--sm featureBtn" href={`/baseline/${scenario.id}`}>
+                        View baseline <span aria-hidden>→</span>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -559,6 +590,16 @@ node harness/submit.mjs \\
                 </label>
                 <button className="btn" type="submit">Post note</button>
               </form>
+              <p className="feedbackContribute">
+                Want to ship code instead? Open a PR — see{" "}
+                <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">
+                  CONTRIBUTING.md
+                </a>{" "}
+                · <span className="mono">git clone</span>{" "}
+                <a className="tlink mono" href="https://github.com/SumeetVarma/openrank-arena" target="_blank" rel="noopener noreferrer">
+                  the repo
+                </a>
+              </p>
             </aside>
           </div>
         </section>
@@ -576,6 +617,8 @@ node harness/submit.mjs \\
         <span>OpenRank Arena · An AEO benchmark</span>
         <span>
           <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena">source</a>
+          {" · "}
+          <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/CONTRIBUTING.md">contribute</a>
           {" · "}
           <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/harness/match.mjs">judge prompt</a>
         </span>

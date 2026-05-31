@@ -4,6 +4,18 @@
 // Entrants can be any mix of: players, "baseline", or incumbent slugs.
 // We only update Elo for players and baseline (incumbents are fixed market
 // fixtures — they don't have Elo records of their own).
+//
+// Reliability guards on this endpoint:
+//   1. Every player entrant must be pinned to a specific submission version
+//      (entrantVersions) so the match record is reproducible.
+//   2. Every player entrant must have a current submission for the scenario
+//      (anti-orphan).
+//   3. No duplicate entrants in the ranking — exception: explicit ties in
+//      the optional `ties` array.
+//   4. Idempotent on (scenario, sorted entrant versions): if a match for the
+//      same fingerprint already exists, this re-judgment is logged for
+//      transparency but does NOT update Elo. Re-judging unchanged content
+//      shouldn't compound Elo — submit a new version to earn more.
 
 import { Redis } from "@upstash/redis";
 import { applyDuel, BASELINE_NAME } from "../../../lib/elo.mjs";
@@ -32,6 +44,7 @@ export async function POST(request) {
     sharedPassword,
     scenarioId,
     ranking,
+    ties = [],
     entrantKinds = {},
     entrantVersions = {},
     model,
@@ -49,9 +62,27 @@ export async function POST(request) {
   if (!Array.isArray(ranking) || ranking.length < 2) {
     return json({ ok: false, error: "Need a ranking with at least 2 entrants" }, 400);
   }
+
+  // Validate the ranking. Duplicates are only allowed if they appear in the
+  // `ties` array (which is a list of arrays of entrant labels that tied).
+  const tieGroups = Array.isArray(ties) ? ties.filter((g) => Array.isArray(g) && g.length >= 2) : [];
+  const tiedSet = new Set(tieGroups.flat());
+  const seen = new Set();
+  for (const ref of ranking) {
+    if (typeof ref !== "string" || !ref.trim()) {
+      return json({ ok: false, error: `Ranking entry must be a non-empty string, got ${JSON.stringify(ref)}` }, 400);
+    }
+    if (seen.has(ref) && !tiedSet.has(ref)) {
+      return json({
+        ok: false,
+        error: `Duplicate entrant "${ref}" in ranking. To indicate a tie, list each entrant once in ranking AND include the tied pair/group in the optional "ties": [["a","b"], ...] array.`
+      }, 400);
+    }
+    seen.add(ref);
+  }
+
   // Reproducibility: every player entrant in the ranking MUST be pinned to a
-  // specific submission version. Otherwise a later re-submission would
-  // silently change what "the judge saw" for this match record.
+  // specific submission version.
   for (const ref of ranking) {
     if (entrantKinds[ref] === "player" && !entrantVersions[ref]) {
       return json({
@@ -61,9 +92,7 @@ export async function POST(request) {
     }
   }
 
-  // Anti-orphan guard: every player entrant must have a current submission
-  // for this scenario. Otherwise we'd write Elo + duel records against a
-  // ghost — exactly how the sumeet/dental orphan got created earlier.
+  // Anti-orphan: every player entrant must have a current submission.
   if (redis) {
     for (const ref of ranking) {
       if (entrantKinds[ref] !== "player") continue;
@@ -77,6 +106,17 @@ export async function POST(request) {
     }
   }
 
+  // Idempotency fingerprint: same scenario + same sorted entrant labels +
+  // same versions = same matchup. If we've already paid out Elo for this
+  // exact tuple, this re-judgment is a replay and gets logged WITHOUT
+  // moving Elo.
+  const fingerprint = buildFingerprint({ scenarioId, ranking, entrantVersions, entrantKinds });
+  let alreadyJudged = false;
+  if (redis) {
+    const prior = await redis.get(`match:fingerprint:${fingerprint}`);
+    if (prior) alreadyJudged = true;
+  }
+
   // Ensure player records exist for any 'player' kind entrants
   for (const ref of ranking) {
     if (entrantKinds[ref] === "player") {
@@ -84,34 +124,56 @@ export async function POST(request) {
     }
   }
 
-  // For each consecutive pair in the ranking, apply Elo. Higher-ranked beats
-  // lower-ranked. Skip pairs where neither entrant has an Elo record
-  // (incumbent-vs-incumbent — meaningless).
-  const eloChanges = {};
   const eligible = (ref) =>
     entrantKinds[ref] === "player" || ref === BASELINE_NAME || entrantKinds[ref] === "baseline";
 
-  for (let i = 0; i < ranking.length; i++) {
-    for (let j = i + 1; j < ranking.length; j++) {
-      const winner = ranking[i];
-      const loser = ranking[j];
-      if (winner === loser) continue;
-      // Skip pure incumbent matchups — no Elo to update
-      if (!eligible(winner) && !eligible(loser)) continue;
+  // Build a tie-aware position map: same position = tied, lower index = higher rank.
+  // Default: every entrant in ranking gets its index as its position.
+  const positionOf = new Map();
+  ranking.forEach((ref, i) => positionOf.set(ref, i));
+  // For each tie group, snap all members to the position of the highest-ranked one.
+  for (const group of tieGroups) {
+    const positions = group.map((g) => positionOf.get(g)).filter((p) => p !== undefined);
+    if (!positions.length) continue;
+    const minPos = Math.min(...positions);
+    for (const g of group) {
+      if (positionOf.has(g)) positionOf.set(g, minPos);
+    }
+  }
 
-      const result = await applyDuel({
-        redis,
-        scenarioId,
-        playerA: winner,
-        playerB: loser,
-        outcome: "A_wins"
-      });
-      for (const [p, change] of Object.entries(result)) {
-        if (!eloChanges[p]) {
-          eloChanges[p] = { before: change.before, after: change.after, delta: change.delta };
-        } else {
-          eloChanges[p].after = change.after;
-          eloChanges[p].delta = eloChanges[p].after - eloChanges[p].before;
+  const eloChanges = {};
+
+  if (!alreadyJudged) {
+    // For each unordered pair, apply Elo based on relative position.
+    // Skip pure-incumbent and pure-baseline-vs-baseline pairs (no Elo state to move).
+    for (let i = 0; i < ranking.length; i++) {
+      for (let j = i + 1; j < ranking.length; j++) {
+        const a = ranking[i];
+        const b = ranking[j];
+        if (a === b) continue;
+        if (!eligible(a) && !eligible(b)) continue;
+
+        const posA = positionOf.get(a);
+        const posB = positionOf.get(b);
+        let outcome;
+        if (posA === posB) outcome = "tie";
+        else if (posA < posB) outcome = "A_wins";
+        else outcome = "B_wins";
+
+        const result = await applyDuel({
+          redis,
+          scenarioId,
+          playerA: a,
+          playerB: b,
+          outcome
+        });
+        for (const [p, change] of Object.entries(result)) {
+          if (!eloChanges[p]) {
+            eloChanges[p] = { before: change.before, after: change.after, delta: change.delta };
+          } else {
+            eloChanges[p].after = change.after;
+            eloChanges[p].delta = eloChanges[p].after - eloChanges[p].before;
+          }
         }
       }
     }
@@ -122,6 +184,7 @@ export async function POST(request) {
     matchId,
     scenarioId,
     ranking,
+    ties: tieGroups,
     entrantKinds,
     entrantVersions,
     model,
@@ -129,16 +192,34 @@ export async function POST(request) {
     signals: signals || [],
     runner: String(runner || "anonymous").slice(0, 120),
     ranAt: new Date().toISOString(),
-    elo: eloChanges
+    elo: eloChanges,
+    replay: alreadyJudged,
+    fingerprint
   };
 
   if (redis) {
     await redis.set(`match:${scenarioId}:${matchId}`, record);
     await redis.lpush(`matches:${scenarioId}:recent`, matchId);
     await redis.ltrim(`matches:${scenarioId}:recent`, 0, 199);
+    // First time we see this fingerprint, claim it so future re-judgments
+    // of identical content land as replays.
+    if (!alreadyJudged) {
+      await redis.set(`match:fingerprint:${fingerprint}`, matchId);
+    }
   }
 
-  return json({ ok: true, matchId, elo: eloChanges });
+  return json({ ok: true, matchId, elo: eloChanges, replay: alreadyJudged });
+}
+
+function buildFingerprint({ scenarioId, ranking, entrantVersions, entrantKinds }) {
+  // Sort entrants alphabetically so the order doesn't matter — what matters
+  // is "who was on this matchup with what content."
+  const parts = [...new Set(ranking)].sort().map((ref) => {
+    const kind = entrantKinds[ref] || (ref === "baseline" ? "baseline" : "player");
+    const v = entrantVersions[ref] || "";
+    return `${ref}|${kind}|${v}`;
+  });
+  return `${scenarioId}::${parts.join("::")}`;
 }
 
 function json(payload, status = 200) {
