@@ -2,7 +2,17 @@ import { notFound } from "next/navigation";
 import { getScenario, getCandidate } from "../../../../lib/scenarios.mjs";
 import { readIncumbent, renderMarkdown, stripSourceNote } from "../../../../lib/baseline.mjs";
 import { structuredDataFor } from "../../../../lib/structured.mjs";
-import { readClonedIncumbent, splitClonedHtml, metaFromCloned } from "../../../../lib/clonedBaseline.mjs";
+import { readClonedIncumbent, metaFromCloned } from "../../../../lib/clonedBaseline.mjs";
+import { extractCloned } from "../../../../lib/clonedExtract.mjs";
+import { RenderedPage } from "../../../_components/RenderedPage.jsx";
+
+function cleanTitle(raw, brand) {
+  if (!raw) return null;
+  let t = raw.trim();
+  const dupRe = new RegExp(`(${brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})\\s*[–|—-]\\s*\\1`, "i");
+  if (dupRe.test(t)) t = t.replace(dupRe, brand);
+  return t;
+}
 
 export async function generateMetadata({ params }) {
   const { scenario: scenarioId, slug } = await params;
@@ -13,7 +23,7 @@ export async function generateMetadata({ params }) {
   if (cloned) {
     const m = metaFromCloned(cloned.html);
     return {
-      title: m.title || `${candidate.name} — ${scenario.label}`,
+      title: cleanTitle(m.title, candidate.name) || `${candidate.name} — ${scenario.label}`,
       description: m.description,
       openGraph: m.openGraph,
       twitter: m.twitter,
@@ -22,9 +32,7 @@ export async function generateMetadata({ params }) {
   }
   return {
     title: `${candidate.name} — ${scenario.label}`,
-    description: `Incumbent page for ${candidate.name} in the ${scenario.label} arena scenario.`,
-    openGraph: { title: candidate.name, description: scenario.label, type: "website" },
-    twitter: { card: "summary", title: candidate.name, description: scenario.label }
+    description: `Incumbent page for ${candidate.name} in the ${scenario.label} arena scenario.`
   };
 }
 
@@ -36,26 +44,25 @@ export default async function IncumbentPage({ params }) {
 
   const cloned = await readClonedIncumbent(scenarioId, slug);
   if (cloned) {
-    const { bodyHtml, jsonLd } = splitClonedHtml(cloned.html);
-    const rewritten = bodyHtml.replace(
-      /(["'])(?:\.\/)?assets\//g,
-      `$1/incumbents/${scenarioId}/${slug}/assets/`
-    );
+    const data = extractCloned(cloned.html, {
+      brandName: candidate.name,
+      kind: "incumbent",
+      localAssets: cloned.localAssets || []
+    });
+    const rewriteAssets = (src) => {
+      if (!src) return src;
+      if (src.startsWith("/")) return src;
+      if (src.startsWith("assets/")) return `/incumbents/${scenarioId}/${slug}/${src}`;
+      return src;
+    };
     return (
-      <main className="renderedPage">
-        <nav className="renderedNav">
-          <a href="/">← OpenRank Arena</a>
-          <span className="renderedBadge">Incumbent · {scenario.label}</span>
-        </nav>
-        <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: rewritten }} />
-        {jsonLd.map((j, i) => (
-          <script
-            key={i}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: j }}
-          />
-        ))}
-      </main>
+      <RenderedPage
+        scenario={scenario}
+        data={data}
+        kind="incumbent"
+        name={candidate.name}
+        rewriteAssets={rewriteAssets}
+      />
     );
   }
 
@@ -63,18 +70,17 @@ export default async function IncumbentPage({ params }) {
   const md = stripSourceNote(await readIncumbent(scenarioId, candidate.baselineFile));
   const html = renderMarkdown(md);
   const jsonLd = structuredDataFor(scenario, candidate);
-
   return (
-    <main className="renderedPage">
-      <nav className="renderedNav">
+    <div className="renderedShell">
+      <div className="renderedTopBar">
         <a href="/">← OpenRank Arena</a>
-        <span className="renderedBadge">Incumbent · {scenario.label}</span>
-      </nav>
-      <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: html }} />
+        <span>Incumbent · {scenario.label}</span>
+      </div>
+      <article className="productSectionBody" dangerouslySetInnerHTML={{ __html: html }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </main>
+    </div>
   );
 }

@@ -2,7 +2,17 @@ import { notFound } from "next/navigation";
 import { getScenario } from "../../../lib/scenarios.mjs";
 import { readUnderdog, renderMarkdown, stripSourceNote } from "../../../lib/baseline.mjs";
 import { structuredDataFor } from "../../../lib/structured.mjs";
-import { readClonedUnderdog, splitClonedHtml, metaFromCloned } from "../../../lib/clonedBaseline.mjs";
+import { readClonedUnderdog, metaFromCloned } from "../../../lib/clonedBaseline.mjs";
+import { extractCloned } from "../../../lib/clonedExtract.mjs";
+import { RenderedPage } from "../../_components/RenderedPage.jsx";
+
+function cleanTitle(raw, brand) {
+  if (!raw) return null;
+  let t = raw.trim();
+  const dupRe = new RegExp(`(${brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})\\s*[–|—-]\\s*\\1`, "i");
+  if (dupRe.test(t)) t = t.replace(dupRe, brand);
+  return t;
+}
 
 export async function generateMetadata({ params }) {
   const { scenario: scenarioId } = await params;
@@ -12,7 +22,7 @@ export async function generateMetadata({ params }) {
   if (cloned) {
     const m = metaFromCloned(cloned.html);
     return {
-      title: m.title || `${scenario.underdog.name} — ${scenario.label}`,
+      title: cleanTitle(m.title, scenario.underdog.name) || `${scenario.underdog.name} — ${scenario.label}`,
       description: m.description || `Baseline page for ${scenario.underdog.name}.`,
       openGraph: m.openGraph,
       twitter: m.twitter,
@@ -22,9 +32,7 @@ export async function generateMetadata({ params }) {
   const c = scenario.underdog;
   return {
     title: `${c.name} — ${scenario.label}`,
-    description: `Baseline page for ${c.name}, the underdog in the ${scenario.label} arena scenario.`,
-    openGraph: { title: c.name, description: scenario.label, type: "website" },
-    twitter: { card: "summary", title: c.name, description: scenario.label }
+    description: `Baseline page for ${c.name}, the underdog in the ${scenario.label} arena scenario.`
   };
 }
 
@@ -34,46 +42,46 @@ export default async function BaselinePage({ params }) {
   if (!scenario) return notFound();
 
   const cloned = await readClonedUnderdog(scenarioId, scenario.underdog.slug);
+
   if (cloned) {
-    const { bodyHtml, jsonLd } = splitClonedHtml(cloned.html);
-    const rewritten = bodyHtml.replace(
-      /(["'])(?:\.\/)?assets\//g,
-      `$1/baseline/${scenarioId}/assets/`
-    );
+    const data = extractCloned(cloned.html, {
+      brandName: scenario.underdog.name,
+      kind: "underdog",
+      localAssets: cloned.localAssets || []
+    });
+    // Rewrite "assets/foo.jpg" to absolute URL on the baseline route
+    const rewriteAssets = (src) => {
+      if (!src) return src;
+      if (src.startsWith("/")) return src;
+      if (src.startsWith("assets/")) return `/baseline/${scenarioId}/${src}`;
+      return src;
+    };
     return (
-      <main className="renderedPage">
-        <nav className="renderedNav">
-          <a href="/">← OpenRank Arena</a>
-          <span className="renderedBadge">Baseline · {scenario.label}</span>
-        </nav>
-        <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: rewritten }} />
-        {jsonLd.map((j, i) => (
-          <script
-            key={i}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: j }}
-          />
-        ))}
-      </main>
+      <RenderedPage
+        scenario={scenario}
+        data={data}
+        kind="underdog"
+        name={scenario.underdog.name}
+        rewriteAssets={rewriteAssets}
+      />
     );
   }
 
-  // Fallback: markdown rendering
+  // Fallback: markdown rendering for scenarios without a clone (shouldn't happen now)
   const md = stripSourceNote(await readUnderdog(scenarioId, scenario.underdog.baselineFile));
   const html = renderMarkdown(md);
   const jsonLd = structuredDataFor(scenario, scenario.underdog);
-
   return (
-    <main className="renderedPage">
-      <nav className="renderedNav">
+    <div className="renderedShell">
+      <div className="renderedTopBar">
         <a href="/">← OpenRank Arena</a>
-        <span className="renderedBadge">Baseline · {scenario.label}</span>
-      </nav>
-      <article className="renderedArticle" dangerouslySetInnerHTML={{ __html: html }} />
+        <span>Baseline · {scenario.label}</span>
+      </div>
+      <article className="productSectionBody" dangerouslySetInnerHTML={{ __html: html }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </main>
+    </div>
   );
 }

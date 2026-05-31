@@ -75,7 +75,16 @@ async function tryLoad(dir) {
     try {
       llmsTxt = await readFile(path.join(dir, "llms.txt"), "utf8");
     } catch {}
-    return { html, llmsTxt, dir };
+    // List files in assets/ for the fallback image extractor
+    let localAssets = [];
+    try {
+      const { readdir } = await import("node:fs/promises");
+      localAssets = (await readdir(path.join(dir, "assets"))).filter((f) =>
+        /\.(jpe?g|png|gif|webp|svg)$/i.test(f)
+      );
+      localAssets.sort();
+    } catch {}
+    return { html, llmsTxt, dir, localAssets };
   } catch {
     return null;
   }
@@ -238,11 +247,19 @@ export function metaFromCloned(fullHtml) {
   const ogUrl = get("property", "og:url");
   const ogType = get("property", "og:type");
   if (ogTitle || ogDesc || ogImage) {
+    // Next.js Metadata API only accepts a fixed set of og:type values.
+    // Coerce anything outside that set to "website".
+    const ALLOWED_OG_TYPES = new Set([
+      "website", "article", "book", "profile",
+      "music.song", "music.album", "music.playlist", "music.radio_station",
+      "video.movie", "video.episode", "video.tv_show", "video.other"
+    ]);
+    const safeOgType = ALLOWED_OG_TYPES.has(ogType) ? ogType : "website";
     out.openGraph = {
       title: ogTitle || undefined,
       description: ogDesc || undefined,
       url: ogUrl || undefined,
-      type: ogType || "website",
+      type: safeOgType,
       images: ogImage ? [{ url: ogImage }] : undefined
     };
   }
