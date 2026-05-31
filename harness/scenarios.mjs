@@ -6,7 +6,7 @@ export const scenarios = {
     id: "carryon",
     label: "Carry-on Travel Backpack",
     buyerQuery:
-      "I need a carry-on travel backpack under $200 for a 10-day trip. Comfortable, organized, durable. What do you recommend?",
+      "I need a carry-on travel backpack around $200 for a 10-day trip. Comfortable, organized, durable. What do you recommend?",
     underdog: { slug: "wayfare-42", name: "Wayfare 42" },
     incumbents: [
       { slug: "voyager-pro-40", name: "Voyager Pro 40" },

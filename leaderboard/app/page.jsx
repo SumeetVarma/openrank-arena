@@ -164,187 +164,234 @@ export default async function Page() {
   const topPlayer = [...rows].sort((a, b) => b.overall - a.overall)[0];
   const totalMatches = recentActivity.filter((e) => e.kind !== "submission").length;
 
+
   return (
     <div className="siteFrame">
+      {/* MASTHEAD */}
       <header className="masthead">
         <div className="mastheadBrand">
           OpenRank <em>Arena</em>
         </div>
         <nav className="mastheadMeta" aria-label="primary">
-          <a href="#scenarios">Scenarios</a>
           <a href="#leaderboard">Leaderboard</a>
-          <a href="#how">How it works</a>
+          <a href="#scenarios">Scenarios</a>
+          <a href="#submit">How to play</a>
           <a className="btn btn--sm" href="#submit" style={{ marginLeft: 8 }}>Submit</a>
         </nav>
       </header>
-      <p className="tagline">Anonymous AEO duels · Real results</p>
 
       <main>
-        {/* ──── Hero + stats card ──── */}
-        <section className="heroSplit">
-          <div className="heroSplitMain">
-            <h1 className="heroHeadlineLg">
-              Beat the page<br />
-              ranked <span className="acc">#10</span>.
-            </h1>
-            <p className="heroSplitLede">
-              Take an underdog page. Rewrite it. Submit head-to-head against your friends. A blind judge picks the better version.
-            </p>
-            <div className="heroActions" style={{ marginTop: "var(--s-5)" }}>
-              <a className="btn" href="#submit">Submit your page</a>
-              <a className="tlink" href="#scenarios">See the scenarios</a>
-            </div>
+        {/* ── 1. HERO — compact ── */}
+        <section className="heroFinal">
+          <p className="heroFinalEyebrow">Anonymous matches · Truth wins · Real Elo</p>
+          <h1 className="heroFinalHead">
+            Beat the page<br />
+            ranked <span className="acc">#10</span>.
+          </h1>
+          <p className="heroFinalLede">
+            Take an underdog page. Rewrite it. Ship it head-to-head against your friends&apos;.
+            A blind judge picks the better version.
+          </p>
+          <div className="heroFinalActions">
+            <a className="btn" href="#submit">Submit your page</a>
+            <a className="tlink" href="#scenarios">See scenarios</a>
           </div>
-
-          <aside className="statBoard" aria-label="Arena stats">
-            <p className="statBoardTitle">Arena at a glance</p>
-            <dl className="statBoardList">
-              <div className="statRow">
-                <dt>
-                  <span className="statIcon" aria-hidden>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="9" cy="8" r="3.5" />
-                      <path d="M16 11a2.5 2.5 0 100-5" />
-                      <path d="M3 19c0-3 2.5-5 6-5s6 2 6 5" />
-                      <path d="M16 14c2.5 0 5 1.5 5 5" />
-                    </svg>
-                  </span>
-                  <span>Active players</span>
-                </dt>
-                <dd className="tnum">{String(players.length).padStart(2, "0")}</dd>
-              </div>
-              <div className="statRow">
-                <dt>
-                  <span className="statIcon" aria-hidden>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
-                    </svg>
-                  </span>
-                  <span>Duels run</span>
-                </dt>
-                <dd className="tnum">{String(totalMatches).padStart(2, "0")}</dd>
-              </div>
-              <div className="statRow">
-                <dt>
-                  <span className="statIcon" aria-hidden>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M7 4h10v3a5 5 0 11-10 0V4z" />
-                      <path d="M5 4h2v3a3 3 0 11-3 0V4z" transform="translate(2,0)" />
-                      <path d="M9 16h6v2H9z" />
-                      <path d="M8 18h8v2H8z" />
-                    </svg>
-                  </span>
-                  <span>Top of board</span>
-                </dt>
-                <dd className={topPlayer ? "leader" : "empty"} style={{ fontFamily: "var(--font-display)", fontStyle: topPlayer ? "italic" : "normal" }}>
-                  {topPlayer ? topPlayer.player : "no one yet"}
-                </dd>
-              </div>
-            </dl>
-          </aside>
         </section>
 
-        {/* ──── Scenario cards ──── */}
-        <section id="scenarios" className="scrollAnchor">
+        {/* ── 2. LEADERBOARD — the centerpiece, big ── */}
+        <section className="section scrollAnchor" id="leaderboard">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">Standings</p>
+              <h2>Leaderboard</h2>
+            </div>
+            <span className="sectionMeta">
+              {players.length} player{players.length === 1 ? "" : "s"} · baseline = 1000 · click columns to sort
+            </span>
+          </div>
+          {players.length === 0 ? (
+            <div className="emptyBoard">
+              <p className="emptyBoardHead">No one&apos;s climbed yet.</p>
+              <p className="emptyBoardSub">First submission claims the top of the board.</p>
+              <a className="btn" href="#submit">Be first</a>
+            </div>
+          ) : (
+            <Leaderboard rows={tableRows} scenarios={scenariosMeta} />
+          )}
+        </section>
+
+        {/* ── 3. SCENARIOS — three cards, properly aligned ── */}
+        <section className="section scrollAnchor" id="scenarios">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">Arenas</p>
+              <h2>Three underdog pages</h2>
+            </div>
+            <span className="sectionMeta">brand-spoofed clones of real ~#10 pages</span>
+          </div>
           <div className="featureRow">
             {scenarioCards.map(({ scenario, heroImage }) => {
-              // For AEO tool, the cloned hero image is a busted text-screenshot fragment.
-              // Use the illustrated empty state instead so the card actually looks like a real product.
-              const useImg = heroImage && scenario.id !== "aeo-tool";
+              // Maple Street's cloned image is a giant copyright-leak logo (the source
+              // Magnolia practice's branding still). AEO image is a screenshot fragment.
+              // Both fall back to the unified italic-serif treatment.
+              const useImg = heroImage && scenario.id === "carryon";
               return (
-              <a
-                key={scenario.id}
-                href={`/baseline/${scenario.id}`}
-                className={`featureCard scenario--${scenario.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <div className="featureLabel">
-                  <span>{scenario.shortLabel}</span>
-                  <span className="tag">view →</span>
-                </div>
-                <div className="featureImage">
-                  {useImg ? (
-                    <img src={heroImage} alt={`${scenario.underdog.name} baseline`} loading="lazy" />
-                  ) : (
-                    <div style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "grid",
-                      placeItems: "center",
-                      background: scenario.id === "aeo-tool"
-                        ? "linear-gradient(135deg, var(--plum) 0%, #2a1f28 100%)"
-                        : "var(--paper-deep)",
-                      color: scenario.id === "aeo-tool" ? "var(--paper-light)" : "var(--ink-mute)"
-                    }}>
-                      <span style={{
-                        fontFamily: "var(--font-display)",
-                        fontStyle: "italic",
-                        fontSize: 48,
-                        fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 1"
+                <a
+                  key={scenario.id}
+                  href={`/baseline/${scenario.id}`}
+                  className={`featureCard scenario--${scenario.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <div className="featureImage">
+                    {useImg ? (
+                      <img src={heroImage} alt={`${scenario.underdog.name} baseline`} loading="lazy" />
+                    ) : (
+                      <div style={{
+                        width: "100%",
+                        height: "100%",
+                        display: "grid",
+                        placeItems: "center",
+                        background: scenario.id === "aeo-tool"
+                          ? "linear-gradient(135deg, var(--plum) 0%, #2a1f28 100%)"
+                          : scenario.id === "dental"
+                            ? "linear-gradient(135deg, var(--sage) 0%, #2c3a23 100%)"
+                            : "var(--paper-deep)",
+                        color: scenario.id === "aeo-tool" || scenario.id === "dental"
+                          ? "var(--paper-light)"
+                          : "var(--ink-mute)"
                       }}>
-                        {scenario.underdog.name}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="featureBody">
-                  <h3>
-                    {scenario.underdog.name}
-                  </h3>
-                  <p style={{ fontSize: 13, color: "var(--ink-mute)", margin: "2px 0 8px" }}>
-                    vs {scenario.incumbents.map((i) => i.name).join(", ")}
-                  </p>
-                  <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 14, color: "var(--ink-soft)", lineHeight: 1.4 }}>
-                    Buyer asks: &ldquo;{scenario.buyerQuery.length > 110 ? scenario.buyerQuery.slice(0, 110) + "…" : scenario.buyerQuery}&rdquo;
-                  </p>
-                  {scenario.id === "aeo-tool" && (
-                    <p className="featureMetaQuote">&ldquo;Life is incomplete without Meta :p&rdquo;</p>
-                  )}
-                </div>
-              </a>
+                        <span style={{
+                          fontFamily: "var(--font-display)",
+                          fontStyle: "italic",
+                          fontSize: 52,
+                          letterSpacing: "-0.02em",
+                          fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 1",
+                          textAlign: "center",
+                          padding: "0 20px"
+                        }}>
+                          {scenario.underdog.name}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="featureBody">
+                    <p className="featureCategory">{scenario.category}</p>
+                    <h3>{scenario.underdog.name}</h3>
+                    <p className="featureVs">vs {scenario.incumbents.map((i) => i.name).join(" · ")}</p>
+                    <p className="featureBuyer">
+                      &ldquo;{scenario.buyerQuery.length > 95 ? scenario.buyerQuery.slice(0, 95) + "…" : scenario.buyerQuery}&rdquo;
+                    </p>
+                    {scenario.id === "aeo-tool" && (
+                      <p className="featureMetaQuote">&ldquo;Life is incomplete without Meta :p&rdquo;</p>
+                    )}
+                  </div>
+                </a>
               );
             })}
           </div>
         </section>
 
-        {/* ──── Submit (CLI-first) ──── */}
-        <section className="section" id="submit">
+        {/* ── 4. HOW IT WORKS ── */}
+        <section className="section scrollAnchor" id="how">
           <div className="sectionHead">
             <div>
-              <p className="eyebrow">Submit</p>
-              <h2>Tell your agent to ship it</h2>
+              <p className="eyebrow">How it works</p>
+              <h2>The whole game in four steps</h2>
             </div>
+            <span className="sectionMeta">no signup · no cost · no setup</span>
+          </div>
+
+          <ol className="howSteps">
+            <li>
+              <span className="howNum">01</span>
+              <div>
+                <h3>Pick a scenario</h3>
+                <p>
+                  Three underdog pages — a carry-on, a dentist, an AEO tool. Each is a brand-spoofed clone of
+                  a real ~#10 page. Real specs. Real weaknesses. Real headroom.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span className="howNum">02</span>
+              <div>
+                <h3>Rewrite the page</h3>
+                <p>
+                  Tighten the copy, sharpen the schema, fix the <code>llms.txt</code>, surface the buyer-relevant
+                  claims first. Ship an <code>index.html</code> + <code>assets/</code> zip. Iterate as often as
+                  you want.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span className="howNum">03</span>
+              <div>
+                <h3>Anyone runs a match</h3>
+                <p>
+                  Any player can run <code>match.mjs</code> from the CLI. The judge sees two or more anonymized
+                  versions side by side with the real market for context. It picks the most credible page.
+                  Fabricate and the judge sniffs it — your page sinks.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span className="howNum">04</span>
+              <div>
+                <h3>Elo updates land here</h3>
+                <p>
+                  Pairwise Elo is derived from every match&apos;s ranking and posted back to the leaderboard.
+                  Baseline is anchored at 1000. The board reflects who&apos;s actually winning, not who talks
+                  the most.
+                </p>
+              </div>
+            </li>
+          </ol>
+
+          <div className="howCta">
+            <p>Ready?</p>
+            <a className="btn" href="#submit">Submit your first page</a>
+          </div>
+        </section>
+
+        {/* ── 5. SUBMIT — compact strip ── */}
+        <section className="section scrollAnchor" id="submit">
+          <div className="sectionHead">
+            <div>
+              <p className="eyebrow">How to play</p>
+              <h2>Three minutes from clone to ranked</h2>
+            </div>
+            <span className="sectionMeta">no signup · first upload claims your name</span>
           </div>
 
           <div className="submitThreeUp">
             <div className="zipPanel">
-              <p className="zipPanelTitle">What goes in the zip</p>
+              <p className="zipPanelTitle">Your zip</p>
               <ul className="zipList">
                 <li>
                   <code>index.html</code>
                   <span className="req">required</span>
-                  <p>The visible page. Real semantic HTML — headings, copy, JSON-LD inline, meta in &lt;head&gt;.</p>
+                  <p>Real semantic HTML. Headings, JSON-LD inline, meta in <code>&lt;head&gt;</code>.</p>
                 </li>
                 <li>
                   <code>llms.txt</code>
                   <span className="rec">recommended</span>
-                  <p>Plain-text summary for AI crawlers. Served at the page&apos;s URL + /llms.txt.</p>
+                  <p>Plain-text summary at <code>/llms.txt</code> for AI crawlers.</p>
                 </li>
                 <li>
                   <code>assets/</code>
                   <span className="rec">recommended</span>
-                  <p>Images and any other static files. Reference as <code>assets/foo.jpg</code> in your HTML.</p>
+                  <p>Images and static files. Reference as <code>assets/foo.jpg</code>.</p>
                 </li>
                 <li>
                   <code>robots.txt</code>
                   <span className="opt">optional</span>
-                  <p>Per-page crawler control. Defaults to permissive otherwise.</p>
+                  <p>Per-page crawler rules. Permissive by default.</p>
                 </li>
               </ul>
             </div>
 
             <div className="cliPanel" style={{ alignSelf: "start" }}>
-              <p className="cliPanelTitle">Clone the repo, then ship from your terminal</p>
+              <p className="cliPanelTitle">From your terminal · or your AI agent</p>
               <pre>{`git clone https://github.com/SumeetVarma/openrank-arena
 cd openrank-arena
 
@@ -354,41 +401,27 @@ node harness/submit.mjs \\
   --dir ./my-page \\
   --note "tightened headings"`}</pre>
               <p className="cliHint">
-                Or just say &ldquo;<span className="em">submit my page to openrank-arena</span>&rdquo;
-                to <span className="em">Claude / Codex / Cursor</span> — your agent clones the repo
-                and runs it for you.
+                Or tell <span className="em">Claude / Codex / Cursor</span>:
+                &ldquo;<span className="em">submit my page to openrank-arena</span>&rdquo; — the agent
+                clones the repo and runs it for you.
               </p>
-              <p className="cliHint" style={{ marginTop: 12 }}>
-                Prefer the browser? <a className="tlink" href="/submit" style={{ color: "var(--ember-soft)", borderColor: "var(--ember-soft)" }}>Upload a zip →</a>
+              <p className="cliHint" style={{ marginTop: 10 }}>
+                No terminal? <a className="tlink" href="/submit" style={{ color: "var(--ember-soft)", borderColor: "var(--ember-soft)" }}>Upload a zip in the browser →</a>
               </p>
             </div>
           </div>
         </section>
 
-        {/* ──── Sortable leaderboard ──── */}
-        <section className="section scrollAnchor" id="leaderboard">
-          <div className="sectionHead">
-            <div>
-              <p className="eyebrow">Standings</p>
-              <h2>Leaderboard</h2>
+        {/* ── 5. RECENT ACTIVITY — only if any ── */}
+        {recentActivity.length > 0 && (
+          <section className="section">
+            <div className="sectionHead">
+              <div>
+                <p className="eyebrow">Activity</p>
+                <h2>Recent</h2>
+              </div>
+              <span className="sectionMeta">{recentActivity.length} events</span>
             </div>
-            <span className="sectionMeta">Baseline = 1000 · click any column</span>
-          </div>
-          <Leaderboard rows={tableRows} scenarios={scenariosMeta} />
-        </section>
-
-        {/* ──── Recent activity ──── */}
-        <section className="section">
-          <div className="sectionHead">
-            <div>
-              <p className="eyebrow">Activity</p>
-              <h2>Recent</h2>
-            </div>
-            <span className="sectionMeta">submissions + matches</span>
-          </div>
-          {recentActivity.length === 0 ? (
-            <p className="muted" style={{ fontStyle: "italic" }}>No activity yet.</p>
-          ) : (
             <ul className="activityFeed">
               {recentActivity.map((e, i) => {
                 const scenario = scenarioList.find((s) => s.id === e.scenarioId);
@@ -405,7 +438,6 @@ node harness/submit.mjs \\
                     </li>
                   );
                 }
-                // match / bout / duel — show full ranking
                 const ranking = Array.isArray(e.ranking) && e.ranking.length
                   ? e.ranking
                   : (e.winner ? [e.winner, e.loser].filter((x) => x && x !== "tie") : []);
@@ -435,115 +467,24 @@ node harness/submit.mjs \\
                 );
               })}
             </ul>
-          )}
-        </section>
-
-        {/* ──── Judge prompt verbatim (collapsed by default) ──── */}
-        <section className="section">
-          <div className="sectionHead">
-            <div>
-              <p className="eyebrow">Judge</p>
-              <h2>The prompt</h2>
-            </div>
-            <span className="sectionMeta">
-              <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/harness/match.mjs">harness/match.mjs</a>
-            </span>
-          </div>
-          <details>
-            <summary style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.12em", color: "var(--ink-mute)", padding: "12px 0", borderTop: "1px solid var(--rule)", borderBottom: "1px solid var(--rule)" }}>
-              Show the full prompt
-            </summary>
-          <pre className="promptBlock" style={{ marginTop: 16 }}>{`You're helping a friend make a real buying decision. They asked:
-
-`}<span className="blockquote">{`"I need a carry-on travel backpack under $200 for a 10-day trip.
-Comfortable, organized, durable. What do you recommend?"`}</span>{`
-
-You pulled up N candidate pages. Pages are in random order; order does not
-reflect relevance.
-
-`}<span className="dim">{`(If all entrants share the same underdog brand, anonymized to a single
-placeholder so familiarity doesn't bias you. Otherwise: mix of underdog
-versions + established competitors — judge each on its own merits.)`}</span>{`
-
-`}<span className="hdg">{"### Page A"}</span>{`
-`}<span className="dim">{"<page content>"}</span>{`
-
-`}<span className="hdg">{"### Page B"}</span>{`
-`}<span className="dim">{"<page content>"}</span>{`
-
-`}<span className="dim">{"(… up to N pages …)"}</span>{`
-
-Rank from MOST credible to LEAST credible.
-
-`}<span className="em">{`Be honest. Don't reward marketing fluff. Fabricated reviews, awards,
-integrations, prices → automatic rank drop. Ties OK.`}</span>{`
-
-`}<span className="json">{`{
-  "ranking": ["A", "B", ...],
-  "rationale": "one-paragraph why",
-  "signals_compared": [
-    { "signal": "clarity_of_answer",  "best": "<letter>", "worst": "<letter>" },
-    { "signal": "concrete_specifics", "best": "<letter>", "worst": "<letter>" },
-    { "signal": "structured_claims",  "best": "<letter>", "worst": "<letter>" },
-    { "signal": "honest_fit",         "best": "<letter>", "worst": "<letter>" },
-    { "signal": "truthfulness",       "best": "<letter>", "worst": "<letter>" }
-  ]
-}`}</span></pre>
-          </details>
-        </section>
-
-        {/* ──── Notes ──── */}
-        <section className="section">
-          <div className="sectionHead">
-            <div>
-              <p className="eyebrow">Notes</p>
-              <h2>Scenario ideas, bugs, tweaks</h2>
-            </div>
-            <span className="sectionMeta">{feedbackRows.length} note{feedbackRows.length === 1 ? "" : "s"}</span>
-          </div>
-          <div className="feedbackGrid">
-            <form className="formCard" action="/api/feedback" method="post">
-              <div className="formField">
-                <label className="formLabel" htmlFor="fb-name">Name</label>
-                <input id="fb-name" name="name" placeholder="your name" />
-              </div>
-              <div className="formField">
-                <label className="formLabel" htmlFor="fb-msg">Note</label>
-                <textarea id="fb-msg" name="message" required placeholder="…" />
-              </div>
-              <div>
-                <button className="btn" type="submit">Post note</button>
-              </div>
-            </form>
-            <div className="noteFeed" aria-label="Notes feed">
-              {feedbackRows.length === 0 ? (
-                <p className="muted" style={{ fontStyle: "italic" }}>Empty.</p>
-              ) : (
-                feedbackRows.slice(0, 8).map((row, i) => (
-                  <article className="note" key={`${row.createdAt}-${i}`}>
-                    <div className="head">
-                      <span className="who">{row.name || "Anonymous"}</span>
-                      <span className="when">{relTime(row.createdAt)}</span>
-                    </div>
-                    <p>{row.message}</p>
-                  </article>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
+      {/* CLIMB BAR */}
       <div className="climbBar">
-        <strong>Was incognito. Climb the leaderboard.</strong>
-        <a className="climbCta" href="#submit">
-          Climb the leaderboard ↗
-        </a>
+        <strong>Think you can beat #10? Climb the board.</strong>
+        <a className="climbCta" href="#submit">Submit your page ↗</a>
       </div>
 
+      {/* FOOTER */}
       <footer className="siteFoot">
-        <span>OpenRank Arena</span>
-        <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena">source</a>
+        <span>OpenRank Arena · An AEO benchmark</span>
+        <span>
+          <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena">source</a>
+          {" · "}
+          <a className="tlink" href="https://github.com/SumeetVarma/openrank-arena/blob/main/harness/match.mjs">judge prompt</a>
+        </span>
       </footer>
     </div>
   );

@@ -137,17 +137,19 @@ body::before {
   color: var(--ink-soft);
 }
 .mastheadBrand {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-weight: 500;
-  font-size: 13px;
-  letter-spacing: 0.04em;
+  font-size: 22px;
+  letter-spacing: -0.01em;
   color: var(--ink);
-  text-transform: uppercase;
+  line-height: 1;
+  font-variation-settings: "opsz" 96, "SOFT" 0;
 }
 .mastheadBrand em {
-  font-style: normal;
+  font-style: italic;
   color: var(--ember);
   font-weight: 500;
+  font-variation-settings: "opsz" 96, "SOFT" 100, "WONK" 1;
 }
 .mastheadMeta {
   display: flex;
@@ -2228,6 +2230,203 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 .cliHint .em {
   color: var(--ember-soft);
   font-style: italic;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Restructured home page (Phase 5.5)
+   ─────────────────────────────────────────────────────────────── */
+
+/* Compact final hero */
+.heroFinal {
+  padding: var(--s-7) 0 var(--s-7);
+  border-bottom: 1px solid var(--rule);
+  max-width: 720px;
+}
+.heroFinalEyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--ember);
+  margin: 0 0 var(--s-4);
+}
+.heroFinalHead {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(44px, 6vw, 76px);
+  line-height: 0.96;
+  letter-spacing: -0.028em;
+  font-variation-settings: "opsz" 144, "SOFT" 20;
+  margin: 0 0 var(--s-4);
+}
+.heroFinalHead .acc {
+  font-style: italic;
+  color: var(--ember);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+.heroFinalLede {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(17px, 1.7vw, 19px);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 52ch;
+  margin: 0 0 var(--s-5);
+  font-variation-settings: "opsz" 48, "SOFT" 0;
+}
+.heroFinalActions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+/* Empty leaderboard state */
+.emptyBoard {
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: var(--s-7) var(--s-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--s-3);
+  min-height: 220px;
+}
+.emptyBoardHead {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.015em;
+  margin: 0;
+  font-variation-settings: "opsz" 96, "SOFT" 30;
+}
+.emptyBoardSub {
+  font-size: 14px;
+  color: var(--ink-mute);
+  margin: 0 0 var(--s-2);
+}
+
+/* Scenario feature card refinements */
+.featureCategory {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin: 0 0 6px;
+}
+.featureBody h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 4px;
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+}
+.featureVs {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+}
+.featureBuyer {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+  font-variation-settings: "opsz" 48, "SOFT" 80, "WONK" 0;
+  border-left: 2px solid var(--ember-soft);
+  padding-left: 10px;
+}
+
+/* How it works steps */
+.howSteps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0;
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.howSteps li {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: var(--s-5);
+  padding: var(--s-5) var(--s-6);
+  border-bottom: 1px solid var(--rule-soft);
+  align-items: start;
+}
+.howSteps li:last-child { border-bottom: none; }
+.howNum {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ember);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+}
+.howSteps h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.015em;
+  margin: 0 0 6px;
+  font-variation-settings: "opsz" 96, "SOFT" 30;
+}
+.howSteps p {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 65ch;
+}
+.howSteps p code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--paper-deep);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--ember-deep);
+}
+.howCta {
+  margin-top: var(--s-5);
+  padding: var(--s-5) var(--s-6);
+  background: var(--ink);
+  color: var(--paper-light);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.howCta p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 24px;
+  margin: 0;
+  font-variation-settings: "opsz" 96, "SOFT" 100, "WONK" 1;
+}
+.howCta .btn {
+  background: var(--ember);
+  border-color: var(--ember);
+}
+.howCta .btn:hover {
+  background: var(--ember-deep);
+  border-color: var(--ember-deep);
 }
 
 /* Small util */
