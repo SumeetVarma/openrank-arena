@@ -2945,6 +2945,35 @@ a.lbName:hover { color: var(--ember); border-color: var(--ember); }
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Final round callout
+   ────────────────────────────────────────────────────────────── */
+.finalRoundCallout {
+  margin: var(--s-6) 0 0;
+  padding: var(--s-5) var(--s-6);
+  background:
+    linear-gradient(90deg, rgba(197, 69, 12, 0.08), rgba(90, 58, 82, 0.05) 70%, transparent);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ember);
+  border-radius: 12px;
+}
+.finalRoundCallout h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(22px, 2.2vw, 28px);
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 96, "SOFT" 20;
+}
+.finalRoundCallout p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 70ch;
+}
+
+/* ──────────────────────────────────────────────────────────────
    Judge prompt viewer
    ────────────────────────────────────────────────────────────── */
 .judgePrompt {

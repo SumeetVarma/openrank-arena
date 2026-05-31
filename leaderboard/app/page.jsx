@@ -411,6 +411,16 @@ export default async function Page() {
             </li>
           </ol>
 
+          <aside className="finalRoundCallout">
+            <p className="eyebrow" style={{ marginBottom: 6 }}>Final round</p>
+            <h3>Final ranking is on a hidden dataset.</h3>
+            <p>
+              At the end of the competition, every submission is re-judged on a held-out set of
+              scenarios nobody has seen. Hand-tuning the three visible pages won&apos;t cut it —
+              build a real pipeline that generalizes.
+            </p>
+          </aside>
+
           <div className="howCta">
             <p>Ready?</p>
             <a className="btn" href="#submit">Submit your first page</a>
