@@ -106,7 +106,7 @@ export default async function Page() {
           <span>{players.length} player{players.length === 1 ? "" : "s"} in the arena</span>
         </div>
         <div className="cards">
-          {scenarioCards.map(({ scenario, submissions }) => (
+          {scenarioCards.map(({ scenario, submissions, scores }) => (
             <article className="scenarioCard" key={scenario.id}>
               <p className="tag">{scenario.category}</p>
               <h3>{scenario.label}</h3>
@@ -133,6 +133,27 @@ export default async function Page() {
                       {sub.name} (v{sub.version}) →
                     </a>
                   ))}
+                </div>
+              )}
+              {scores.length > 0 && (
+                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)" }}>
+                  <strong style={{ fontSize: 12, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    Recent judge runs ({scores.length})
+                  </strong>
+                  <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0 0", fontSize: 13 }}>
+                    {scores.slice(0, 5).map((r) => {
+                      const winnerLabel = r.pick;
+                      const winnerEntry = (r.labeled || []).find((l) => l.label === winnerLabel);
+                      const winnerName = winnerEntry?.slug?.startsWith("player:")
+                        ? winnerEntry.slug.replace("player:", "")
+                        : winnerEntry?.slug || "?";
+                      return (
+                        <li key={r.runId} style={{ padding: "4px 0", color: "var(--muted)" }}>
+                          <strong style={{ color: "var(--ink)" }}>{winnerName}</strong> picked · by {r.runner} · {r.model} · {new Date(r.ranAt).toLocaleString()}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               )}
             </article>
