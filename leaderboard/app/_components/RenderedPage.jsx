@@ -79,9 +79,16 @@ const BRAND_NAME_REGEX = new RegExp(
   "g"
 );
 
+// Also strip email addresses on original-brand domains.
+const LEAK_EMAIL_REGEX = new RegExp(
+  "[a-zA-Z0-9._-]+@(?:topodesigns\\.com|tortugabackpacks\\.com|nomatic\\.com|rankscale\\.ai|tryprofound\\.com|usehall\\.com|brightedge\\.com|magnoliadentistryatx\\.com|blunncreekdental\\.com|nwaustinfamilydentistry\\.com|brobergfamilydental\\.com|mmfamilydentistry\\.com)",
+  "gi"
+);
+
 function scrubJsonLdBlock(raw) {
   if (!raw) return raw;
   return raw
+    .replace(LEAK_EMAIL_REGEX, "")
     .replace(LEAK_DOMAIN_REGEX, "https://openrank-arena.vercel.app")
     .replace(LEAK_PATH_REGEX, "https://openrank-arena.vercel.app")
     .replace(BRAND_NAME_REGEX, "");
