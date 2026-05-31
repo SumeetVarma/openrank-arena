@@ -162,17 +162,13 @@ export default async function Page() {
           </div>
 
           <aside className="boardCard" aria-label="Leaderboard summary">
-            <dl className="boardCardHead">
+            <dl className="boardCardHead" style={{ gridTemplateColumns: "1fr 1fr" }}>
               <div className="boardStat">
                 <dt>Players</dt>
                 <dd className="tnum">
                   {String(players.length).padStart(2, "0")}
                   <span className="sub">/ 5</span>
                 </dd>
-              </div>
-              <div className="boardStat">
-                <dt>Duels logged</dt>
-                <dd className="tnum">{String(totalDuels).padStart(3, "0")}</dd>
               </div>
               <div className="boardStat">
                 <dt>Current leader</dt>
@@ -336,30 +332,6 @@ export default async function Page() {
             ))}
           </div>
         </section>
-
-        {/* ──── Players ──── */}
-        {players.length > 0 && (
-          <section className="section">
-            <div className="sectionHead">
-              <div>
-                <p className="eyebrow">Roster</p>
-                <h2>Who's in the arena.</h2>
-              </div>
-              <span className="sectionMeta">{players.length} player{players.length === 1 ? "" : "s"}</span>
-            </div>
-            <div className="cardGrid">
-              {players.map((p) => (
-                <a key={p.name} className="playerCard" href={`/players/${p.name}`}>
-                  <span className="avatar" aria-hidden="true">{p.name.slice(0, 1).toUpperCase()}</span>
-                  <span className="name">{p.name}</span>
-                  <span className="joined">
-                    {new Date(p.joinedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* ──── How judging works ──── */}
         <section className="section">
