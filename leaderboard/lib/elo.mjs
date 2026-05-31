@@ -29,7 +29,12 @@ export async function getEloFor(redis, player, scenarioId) {
   const key = `elo:${String(player).toLowerCase()}`;
   if (!redis) return SEED_ELO;
   const rating = await redis.hget(key, scenarioId);
-  return Number.isFinite(Number(rating)) ? Number(rating) : SEED_ELO;
+  // hget returns null when the field is missing — that's a fresh player and we
+  // need to return SEED_ELO. Number(null) is 0 (finite) so we must check null
+  // explicitly before coercing.
+  if (rating === null || rating === undefined) return SEED_ELO;
+  const n = Number(rating);
+  return Number.isFinite(n) ? n : SEED_ELO;
 }
 
 export async function getDuelsFor(redis, player, scenarioId) {
@@ -37,7 +42,9 @@ export async function getDuelsFor(redis, player, scenarioId) {
   if (!redis) return 0;
   const key = `duels:${String(player).toLowerCase()}`;
   const count = await redis.hget(key, scenarioId);
-  return Number.isFinite(Number(count)) ? Number(count) : 0;
+  if (count === null || count === undefined) return 0;
+  const n = Number(count);
+  return Number.isFinite(n) ? n : 0;
 }
 
 export function expectedScore(ratingA, ratingB) {
