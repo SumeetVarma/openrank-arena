@@ -162,6 +162,7 @@ export default async function Page() {
   const feedbackRows = await getFeedbackRows();
 
   const topPlayer = [...rows].sort((a, b) => b.overall - a.overall)[0];
+  const totalMatches = recentActivity.filter((e) => e.kind !== "submission").length;
 
   return (
     <div className="siteFrame">
@@ -170,28 +171,87 @@ export default async function Page() {
           OpenRank <em>Arena</em>
         </div>
         <nav className="mastheadMeta" aria-label="primary">
-          <a href="#leaderboard">leaderboard</a>
-          <a href="#scenarios">scenarios</a>
-          <a href="/submit">submit</a>
+          <a href="#scenarios">Scenarios</a>
+          <a href="#leaderboard">Leaderboard</a>
+          <a href="#how">How it works</a>
+          <a className="btn btn--sm" href="#submit" style={{ marginLeft: 8 }}>Submit</a>
         </nav>
       </header>
+      <p className="tagline">Anonymous AEO duels · Real results</p>
 
       <main>
-        {/* ──── Hero ──── */}
-        <section className="heroSimple">
-          <h1 className="heroHeadlineLg">
-            Beat the page ranked <span className="acc">#10</span>.
-          </h1>
-          <div className="heroActions" style={{ marginTop: "var(--s-5)" }}>
-            <a className="btn" href="#submit">Submit</a>
-            <a className="tlink" href="#leaderboard">Leaderboard</a>
+        {/* ──── Hero + stats card ──── */}
+        <section className="heroSplit">
+          <div className="heroSplitMain">
+            <h1 className="heroHeadlineLg">
+              Beat the page<br />
+              ranked <span className="acc">#10</span>.
+            </h1>
+            <p className="heroSplitLede">
+              Take an underdog page. Rewrite it. Submit head-to-head against your friends. A blind judge picks the better version.
+            </p>
+            <div className="heroActions" style={{ marginTop: "var(--s-5)" }}>
+              <a className="btn" href="#submit">Submit your page</a>
+              <a className="tlink" href="#scenarios">See the scenarios</a>
+            </div>
           </div>
+
+          <aside className="statBoard" aria-label="Arena stats">
+            <p className="statBoardTitle">Arena at a glance</p>
+            <dl className="statBoardList">
+              <div className="statRow">
+                <dt>
+                  <span className="statIcon" aria-hidden>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="9" cy="8" r="3.5" />
+                      <path d="M16 11a2.5 2.5 0 100-5" />
+                      <path d="M3 19c0-3 2.5-5 6-5s6 2 6 5" />
+                      <path d="M16 14c2.5 0 5 1.5 5 5" />
+                    </svg>
+                  </span>
+                  <span>Active players</span>
+                </dt>
+                <dd className="tnum">{String(players.length).padStart(2, "0")}</dd>
+              </div>
+              <div className="statRow">
+                <dt>
+                  <span className="statIcon" aria-hidden>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
+                    </svg>
+                  </span>
+                  <span>Duels run</span>
+                </dt>
+                <dd className="tnum">{String(totalMatches).padStart(2, "0")}</dd>
+              </div>
+              <div className="statRow">
+                <dt>
+                  <span className="statIcon" aria-hidden>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M7 4h10v3a5 5 0 11-10 0V4z" />
+                      <path d="M5 4h2v3a3 3 0 11-3 0V4z" transform="translate(2,0)" />
+                      <path d="M9 16h6v2H9z" />
+                      <path d="M8 18h8v2H8z" />
+                    </svg>
+                  </span>
+                  <span>Top of board</span>
+                </dt>
+                <dd className={topPlayer ? "leader" : "empty"} style={{ fontFamily: "var(--font-display)", fontStyle: topPlayer ? "italic" : "normal" }}>
+                  {topPlayer ? topPlayer.player : "no one yet"}
+                </dd>
+              </div>
+            </dl>
+          </aside>
         </section>
 
         {/* ──── Scenario cards ──── */}
         <section id="scenarios" className="scrollAnchor">
           <div className="featureRow">
-            {scenarioCards.map(({ scenario, heroImage }) => (
+            {scenarioCards.map(({ scenario, heroImage }) => {
+              // For AEO tool, the cloned hero image is a busted text-screenshot fragment.
+              // Use the illustrated empty state instead so the card actually looks like a real product.
+              const useImg = heroImage && scenario.id !== "aeo-tool";
+              return (
               <a
                 key={scenario.id}
                 href={`/baseline/${scenario.id}`}
@@ -199,15 +259,29 @@ export default async function Page() {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 <div className="featureLabel">
-                  <span className="tag">{scenario.category}</span>
                   <span>{scenario.shortLabel}</span>
+                  <span className="tag">view →</span>
                 </div>
                 <div className="featureImage">
-                  {heroImage ? (
+                  {useImg ? (
                     <img src={heroImage} alt={`${scenario.underdog.name} baseline`} loading="lazy" />
                   ) : (
-                    <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "var(--ink-mute)" }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 36 }}>
+                    <div style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "grid",
+                      placeItems: "center",
+                      background: scenario.id === "aeo-tool"
+                        ? "linear-gradient(135deg, var(--plum) 0%, #2a1f28 100%)"
+                        : "var(--paper-deep)",
+                      color: scenario.id === "aeo-tool" ? "var(--paper-light)" : "var(--ink-mute)"
+                    }}>
+                      <span style={{
+                        fontFamily: "var(--font-display)",
+                        fontStyle: "italic",
+                        fontSize: 48,
+                        fontVariationSettings: "'opsz' 144, 'SOFT' 100, 'WONK' 1"
+                      }}>
                         {scenario.underdog.name}
                       </span>
                     </div>
@@ -216,21 +290,20 @@ export default async function Page() {
                 <div className="featureBody">
                   <h3>
                     {scenario.underdog.name}
-                    <span className="vs"> vs {scenario.incumbents.map((i) => i.name).join(", ")}</span>
                   </h3>
-                  <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 15, color: "var(--ink-soft)" }}>
-                    &ldquo;{scenario.buyerQuery}&rdquo;
+                  <p style={{ fontSize: 13, color: "var(--ink-mute)", margin: "2px 0 8px" }}>
+                    vs {scenario.incumbents.map((i) => i.name).join(", ")}
+                  </p>
+                  <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: 14, color: "var(--ink-soft)", lineHeight: 1.4 }}>
+                    Buyer asks: &ldquo;{scenario.buyerQuery.length > 110 ? scenario.buyerQuery.slice(0, 110) + "…" : scenario.buyerQuery}&rdquo;
                   </p>
                   {scenario.id === "aeo-tool" && (
                     <p className="featureMetaQuote">&ldquo;Life is incomplete without Meta :p&rdquo;</p>
                   )}
-                  <div className="row">
-                    <span>View baseline</span>
-                    <a href={`/baseline/${scenario.id}`}>open →</a>
-                  </div>
                 </div>
               </a>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -241,33 +314,52 @@ export default async function Page() {
               <p className="eyebrow">Submit</p>
               <h2>Tell your agent to ship it</h2>
             </div>
-            <span className="sectionMeta">
-              first upload registers you · iterate freely
-            </span>
           </div>
 
-          <div className="submitTwoUp">
+          <div className="submitThreeUp">
+            <div className="zipPanel">
+              <p className="zipPanelTitle">What goes in the zip</p>
+              <ul className="zipList">
+                <li>
+                  <code>index.html</code>
+                  <span className="req">required</span>
+                  <p>The visible page. Real semantic HTML — headings, copy, JSON-LD inline, meta in &lt;head&gt;.</p>
+                </li>
+                <li>
+                  <code>llms.txt</code>
+                  <span className="rec">recommended</span>
+                  <p>Plain-text summary for AI crawlers. Served at the page&apos;s URL + /llms.txt.</p>
+                </li>
+                <li>
+                  <code>assets/</code>
+                  <span className="rec">recommended</span>
+                  <p>Images and any other static files. Reference as <code>assets/foo.jpg</code> in your HTML.</p>
+                </li>
+                <li>
+                  <code>robots.txt</code>
+                  <span className="opt">optional</span>
+                  <p>Per-page crawler control. Defaults to permissive otherwise.</p>
+                </li>
+              </ul>
+            </div>
+
             <div className="cliPanel" style={{ alignSelf: "start" }}>
-              <p className="cliPanelTitle">From your terminal · or via Claude / Codex</p>
-              <pre>{`node harness/submit.mjs \\
+              <p className="cliPanelTitle">Clone the repo, then ship from your terminal</p>
+              <pre>{`git clone https://github.com/SumeetVarma/openrank-arena
+cd openrank-arena
+
+node harness/submit.mjs \\
   --name alice \\
   --scenario carryon \\
   --dir ./my-page \\
   --note "tightened headings"`}</pre>
               <p className="cliHint">
-                Defaults to <code>https://openrank-arena.vercel.app</code>.
-                Just say &ldquo;<span className="em">submit my page to openrank-arena</span>&rdquo; — your agent
-                takes it from there.
+                Or just say &ldquo;<span className="em">submit my page to openrank-arena</span>&rdquo;
+                to <span className="em">Claude / Codex / Cursor</span> — your agent clones the repo
+                and runs it for you.
               </p>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.16em", color: "var(--ink-mute)" }}>
-                Prefer the browser?
-              </p>
-              <a className="btn btn--ghost" href="/submit">Upload a zip</a>
-              <p style={{ fontSize: 13, color: "var(--ink-mute)", lineHeight: 1.5 }}>
-                Drag your zip, tag a scenario, done. Slower than the CLI but no setup.
+              <p className="cliHint" style={{ marginTop: 12 }}>
+                Prefer the browser? <a className="tlink" href="/submit" style={{ color: "var(--ember-soft)", borderColor: "var(--ember-soft)" }}>Upload a zip →</a>
               </p>
             </div>
           </div>
@@ -441,6 +533,13 @@ integrations, prices → automatic rank drop. Ties OK.`}</span>{`
           </div>
         </section>
       </main>
+
+      <div className="climbBar">
+        <strong>Was incognito. Climb the leaderboard.</strong>
+        <a className="climbCta" href="#submit">
+          Climb the leaderboard ↗
+        </a>
+      </div>
 
       <footer className="siteFoot">
         <span>OpenRank Arena</span>
