@@ -161,13 +161,14 @@ function buildNextMetadata(meta, { name, scenario }) {
 
   const tw = meta.twitter || {};
   if (tw.card || tw.title || tw.description || tw.image) {
+    // Same rule as og:image — only keep twitter:image if same-origin or arena-hosted.
+    const safeTwImage = tw.image && /^(https?:\/\/openrank-arena\.vercel\.app|\/)/.test(tw.image) ? tw.image : null;
     next.twitter = {
       card: tw.card || "summary",
       title: tw.title || title,
       description: tw.description || description,
-      site: tw.site || undefined,
-      creator: tw.creator || undefined,
-      images: tw.image ? [tw.image] : undefined
+      // Drop player-controlled twitter:site / twitter:creator — the arena owns identity.
+      images: safeTwImage ? [safeTwImage] : undefined
     };
   }
 
