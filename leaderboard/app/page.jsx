@@ -182,12 +182,9 @@ export default async function Page() {
           <h1 className="heroHeadlineLg">
             Beat the page ranked <span className="acc">#10</span>.
           </h1>
-          <p>
-            An AEO benchmark for friends. Three underdog pages, three scenarios. Edit them, upload, a judge picks the better version.
-          </p>
-          <div className="heroActions">
-            <a className="btn" href="#submit">Submit your page</a>
-            <a className="tlink" href="#leaderboard">See the board</a>
+          <div className="heroActions" style={{ marginTop: "var(--s-5)" }}>
+            <a className="btn" href="#submit">Submit</a>
+            <a className="tlink" href="#leaderboard">Leaderboard</a>
           </div>
         </section>
 
