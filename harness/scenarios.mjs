@@ -10,9 +10,7 @@ export const scenarios = {
     underdog: { slug: "wayfare-42", name: "Wayfare 42" },
     incumbents: [
       { slug: "voyager-pro-40", name: "Voyager Pro 40" },
-      { slug: "apex-30l", name: "Apex Travel Backpack 30L" },
-      { slug: "roamcore", name: "Roamcore Travel Pack" },
-      { slug: "andina-35l", name: "Andina 35L Travel Pack" }
+      { slug: "roamcore", name: "Roamcore Travel Pack" }
     ]
   },
   dental: {
@@ -23,9 +21,7 @@ export const scenarios = {
     underdog: { slug: "maple-street-dental", name: "Maple Street Dental" },
     incumbents: [
       { slug: "cedar-hill", name: "Cedar Hill Family Dentistry" },
-      { slug: "cameron-road", name: "Cameron Road Family Dentistry" },
-      { slug: "parmer-lane", name: "Parmer Lane Family Dentistry" },
-      { slug: "westlake-family", name: "Westlake Family Dental" }
+      { slug: "parmer-lane", name: "Parmer Lane Family Dentistry" }
     ]
   },
   "aeo-tool": {
@@ -36,8 +32,7 @@ export const scenarios = {
     underdog: { slug: "openrank", name: "OpenRank" },
     incumbents: [
       { slug: "lumen-aeo", name: "Lumen AEO" },
-      { slug: "vantage-ai", name: "Vantage AI" },
-      { slug: "beacon-search", name: "Beacon Search" }
+      { slug: "vantage-ai", name: "Vantage AI" }
     ]
   }
 };

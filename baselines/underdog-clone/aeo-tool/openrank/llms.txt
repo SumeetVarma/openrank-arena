@@ -1,0 +1,99 @@
+# OpenRank
+
+> Baseline page for the "aeo-tool" arena scenario. Kind: underdog.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+Features
+Testimonials
+Case Studies
+Partners
+Resources
+Pricing
+Log in
+Get Started
+Own Your
+AI Presence
+
+OpenRank provides AI visibility analytics across 17+ engines, including ChatGPT, Perplexity, Claude, and Google Gemini, to monitor and improve your brand presence.
+
+Book a Demo
+Get Started
+
+All Regions
+
+Trusted visibility tracking across 240+ countries and all languages.
+
+94+ Technical Checkpoints
+
+Automatic auditing of the structural and authority signals AI engines use to verify and cite your content.
+
+Full-Spectrum Tracking
+
+Monitor brand presence across both chat interfaces and raw AI models with intent-based prompt research.
+
+TRACK 17+ AI PLATFORMS WITH OpenRank. NO UPSELL.
+
+ChatGPT
+Perplexity
+Claude
+Gemini
+AI Overviews
+DeepSeek
+Grok
+Copilot
+Mistral
+AI Mode
+ChatGPT
+Perplexity
+Claude
+Gemini
+AI Overviews
+DeepSeek
+Grok
+Copilot
+Mistral
+AI Mode
+
+Trusted by 1000+ active users
+
+BRANDS
+
+AGENCIES
+
+PUBLISHERS
+
+The Complete Stack to
+Dominate AI Search
+
+OpenRank delivers an integrated software suite for professional brand monitoring and performance optimization in the AI search ecosystem.
+
+Brand Visibility Dashboard
+AI Rank Tracker
+Competitor Analysis
+Citation Analysis
+Sentiment Analysis
+Page Audits
+Prompt Research
+Prompt Research
+LLM
+Native
+1
+Estimate prompt search volume through semantic reconstruction
+2
+Decode intent and prompt density
+3
+Optimize content for likely question patterns in AI search
+Brand Visibility Dashboard
+Monitor your AI Visibility
+in 17+ AI Engines
+1
+Central
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.

@@ -54,10 +54,12 @@ export default async function Page() {
       <section className="hero">
         <div className="heroCopy">
           <p className="eyebrow">OpenRank Arena</p>
-          <h1>Practice AEO. Beat the incumbents. Iterate fast.</h1>
+          <h1>An AEO dojo for people who think they can out-optimize a ChatGPT result.</h1>
           <p>
-            A closed-arena answer engine optimization benchmark for friends. Pick a scenario, optimize the underdog
-            page until an AI judge prefers it over the incumbents — and try not to fabricate anything along the way.
+            Pick an underdog brand stuck somewhere around result #10. Rewrite the page, tune the schema, fix the llms.txt,
+            tighten the headings — until an AI judge calls your version the most credible. Lie about awards, prices,
+            or integrations and the judge sniffs it and you eat the rank penalty. Start at 1000 Elo. Try to reach 2000
+            before your friends do.
           </p>
           <p style={{ marginTop: 14 }}>
             <a href="#start" style={{ color: "var(--clay-dark)", fontWeight: 600 }}>
@@ -69,16 +71,16 @@ export default async function Page() {
         </div>
         <div className="heroPanel" aria-label="How it works">
           <div>
-            <strong>1 · Pick a scenario</strong>
-            <span>Each one has a real #10-ranked underdog and 3–4 spoofed incumbents.</span>
+            <strong>1 · Pick your underdog</strong>
+            <span>3 scenarios. Each one a real ~#10-class page (brand name spoofed, content cloned), stuck in the middle of the SERP, ready for you to drag uphill.</span>
           </div>
           <div>
             <strong>2 · Optimize the page</strong>
-            <span>Upload a zip with index.html, llms.txt, JSON-LD, images. Iterate as many times as you want.</span>
+            <span>Zip up index.html, llms.txt, JSON-LD, images. Upload. Edit. Upload again. Every version is kept; latest is what duels.</span>
           </div>
           <div>
-            <strong>3 · Judge it</strong>
-            <span>An AI judge picks the buyer's recommendation from the candidate pool. Truthful wins.</span>
+            <strong>3 · Duel your friends</strong>
+            <span>Run a duel from the CLI: 1v1 or N-way. Judge picks the more credible version. Elo updates land here in real time. Baseline = 1000, ceiling ≈ 2000.</span>
           </div>
         </div>
       </section>
@@ -148,7 +150,7 @@ export default async function Page() {
           </label>
           <button type="submit">Claim name & create v1 from baseline →</button>
           <p className="small" style={{ marginTop: 4 }}>
-            This seeds a v1 submission identical to the baseline. You're instantly live at <code>/players/&lt;name&gt;/&lt;scenario&gt;</code> and can upload improved versions any time from <a href="/submit">/submit</a>.
+            Pick a name, get a v1, start scheming. Your page goes live at <code>/players/&lt;name&gt;/&lt;scenario&gt;</code> instantly. Upload as many improved versions as you want — every duel runs against whichever one is latest.
           </p>
         </form>
       </section>
@@ -238,7 +240,7 @@ export default async function Page() {
             ))}
           </div>
         ) : (
-          <p>No players yet. The first submission claims a name and lights up the board.</p>
+          <p>Empty arena. First submission claims a name and lights up the board. (Be the one your friends try to dethrone.)</p>
         )}
       </section>
 
@@ -246,26 +248,26 @@ export default async function Page() {
         <div className="sectionHead">
           <div>
             <p className="eyebrow">Judging</p>
-            <h2>How an AI judge sees this</h2>
+            <h2>What the judge is actually doing</h2>
           </div>
-          <span>closed-set, ordering-neutral</span>
+          <span>organic, anonymized, allergic to fabrications</span>
         </div>
         <div className="rulesGrid">
           <article>
-            <strong>Buyer framing</strong>
-            <p>The judge thinks it's helping a friend shop. No mention of arena, leaderboard, or "submissions."</p>
+            <strong>It thinks it's helping a friend shop</strong>
+            <p>The prompt never says "AEO." It says: "your friend asked X — pick the more credible version." Realistic, not gamed.</p>
           </article>
           <article>
-            <strong>Order doesn't matter</strong>
-            <p>Pages are shuffled and labeled A/B/C... The prompt explicitly says order does not reflect relevance.</p>
+            <strong>All entries look identical at first glance</strong>
+            <p>Same brand name, same product. Judge can't pick by branding bias. Only the page's structure, claims, schema, and copy decide it.</p>
           </article>
           <article>
-            <strong>Truthful wins</strong>
-            <p>Fabricating claims about the target caps your run at half score. Recommend based on what's actually on the page.</p>
+            <strong>Lying loses, hard</strong>
+            <p>Fake awards, fake reviews, fake integrations, made-up prices: the judge flags it and your page sinks in the ranking. Truth + structure {">"} swagger.</p>
           </article>
           <article>
-            <strong>JSON output</strong>
-            <p>Judge returns a pick, full ranking, per-page reasoning, and fabrication flags. We parse and score.</p>
+            <strong>Pairwise or N-way</strong>
+            <p>Run <code>duel.mjs</code> for 1v1, <code>bout.mjs</code> for free-for-all. Elo updates from each. Multiple duels per scenario beats variance.</p>
           </article>
         </div>
       </section>

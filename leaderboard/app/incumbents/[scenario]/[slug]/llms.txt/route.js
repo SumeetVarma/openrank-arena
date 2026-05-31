@@ -1,6 +1,7 @@
 import { getScenario, getCandidate } from "../../../../../lib/scenarios.mjs";
 import { readIncumbent, stripSourceNote } from "../../../../../lib/baseline.mjs";
 import { llmsTxtFromMarkdown } from "../../../../../lib/llmstxt.mjs";
+import { readClonedIncumbent } from "../../../../../lib/clonedBaseline.mjs";
 
 export async function GET(_request, { params }) {
   const { scenario: scenarioId, slug } = await params;
@@ -9,9 +10,19 @@ export async function GET(_request, { params }) {
   if (!scenario || !candidate || candidate.kind !== "incumbent") {
     return new Response("Not found", { status: 404 });
   }
+
+  const cloned = await readClonedIncumbent(scenarioId, slug);
+  if (cloned?.llmsTxt) {
+    return text(cloned.llmsTxt);
+  }
+
   const md = stripSourceNote(await readIncumbent(scenarioId, candidate.baselineFile));
   const txt = llmsTxtFromMarkdown(md, { name: candidate.name, kind: "incumbent", scenario });
-  return new Response(txt, {
+  return text(txt);
+}
+
+function text(t) {
+  return new Response(t, {
     status: 200,
     headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=300" }
   });

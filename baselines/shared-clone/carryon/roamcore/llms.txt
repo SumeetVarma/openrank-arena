@@ -1,0 +1,67 @@
+# Roamcore Travel Pack
+
+> Baseline page for the "carryon" arena scenario. Kind: incumbent.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+Please note: This website includes an accessibility system. Press Control-F11 to adjust the website to people with visual disabilities who are using a screen reader; Press Control-F10 to open an accessibility menu.
+Press enter for Accessibility for blind people
+who use screen readers
+Press enter for Keyboard Navigation
+Press enter for Accessibility menu
+SALE EXTENDED—SAVE UP TO 35% OFF APPAREL →
+0
+DAYS
+19
+HRS
+33
+MINS
+25
+SECS
+Shop All
+Best Sellers
+Bags
+Luggage
+Camera
+Apparel
+Accessories
+Sale
+0
+Home
+Travel Pack
+0:02 / 0:30
+TRAVEL PACK
+Regular price
+$349.99
+Rated 4.8 out of 5 stars
+3,395 Reviews
+Click to scroll to reviews
+Color: Black
+Size: 20L
+20L
+14L
+ADD TO CART
+
+This Item Ships Free!
+
+LIFETIME WARRANTY & REPAIR
+
+EASY RETURNS & EXCHANGES
+
+FREE SHIPPING OVER $99
+
+BUY NOW, PAY LATER
+
+DESCRIPTION
+
+The Roamcore Travel Pack is your ultimate companion for life's adventures. Our innovative, patented strap system seamlessly transforms this backpack into a sleek briefcase for those professional moments. With a full perimeter zipper granting access to 22 purposeful pockets, including RFID-safe storage and hidden compartments, this pack ensures your valuables stay secure. 
+
+Navigate airport security effortlessly with the TSA-approved fold-down laptop pocket. From tech organization to spacious main compartments, with zippered mesh walls for easy access to luggage space, this pack is designed for versatility. Plus, our magnetic water bottle pockets ensure hydration is always at hand. Availa
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.

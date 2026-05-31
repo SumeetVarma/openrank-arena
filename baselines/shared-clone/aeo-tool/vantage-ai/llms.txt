@@ -1,0 +1,90 @@
+# Vantage AI
+
+> Baseline page for the "aeo-tool" arena scenario. Kind: incumbent.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+Vantage AI
+Features
+Pricing
+Resources
+Log in
+Talk to sales
+Get insight into how AI talks about you.
+
+Understand and measure how your business and website appears in the millions of questions people are asking AI.
+
+UNCOVER INSIGHTS FROM
+ChatGPT
+AI Mode
+AI Overviews
+Perplexity
+Gemini
+Copilot
+Claude
+DeepSeek
+USED BY THOUSANDS OF MARKETERS WORLDWIDE
+
+what is the best ecommerce platform?
+
+Shopify
+Shopify
+excels
+in
+ease
+of
+use,
+WooCommerce
+WooCommerce
+offers
+flexibility
+for
+WordPress
+users,
+and
+BigCommerce
+BigCommerce
+provides
+powerful
+built-in
+features
+for
+growing
+businesses.
+
+GENERATIVE ANSWER INSIGHTS
+
+Monitor how your brand and company appears in AI conversations
+
+See how your brand appears across AI conversations and track sentiment, share of voice, and positioning to improve your presence.
+
+Explore answer insights
+
+Shopify excels in case of use, WooCommerce offers flexibility for WordPress users, and BigCommerce provides powerful built-in features for growing businesses. Shopify BigCommerce
+
+Citations
+Shopify
+The 6 best eCommerce website building platforms in 2025
+WEBSITE CITATION INSIGHTS
+
+See the conversations where AI references your content and website
+
+See exactly which pages get cited in AI conversations across the millions of questions people are asking conversational AI.
+
+Explore citation insights
+I’m researching ecommerce platforms…
+Searching the web…
+Reading godaddy.com…
+Reading more from techradar.com…
+Reading reviews from g2.com…
+AGENT ANALYTICS
+
+Observe how AI agents a
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.

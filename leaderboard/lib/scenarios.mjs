@@ -14,11 +14,9 @@ export const scenarios = {
     },
     incumbents: [
       { slug: "voyager-pro-40", name: "Voyager Pro 40", baselineFile: "incumbent_tortuga.md" },
-      { slug: "apex-30l", name: "Apex Travel Backpack 30L", baselineFile: "incumbent_peak.md" },
-      { slug: "roamcore", name: "Roamcore Travel Pack", baselineFile: "incumbent_nomatic.md" },
-      { slug: "andina-35l", name: "Andina 35L Travel Pack", baselineFile: "incumbent_cotopaxi.md" }
+      { slug: "roamcore", name: "Roamcore Travel Pack", baselineFile: "incumbent_nomatic.md" }
     ],
-    notes: "The underdog is a real #10-class product (Topo Designs Global Travel Bag) with known weak spots: small laptop sleeve, subpar harness, low airline compliance. Real headroom for AEO."
+    notes: "Underdog Wayfare 42 is cloned from Topo Designs' Global Pro Backpack. Incumbents are Tortuga + Nomatic real product pages."
   },
   dental: {
     id: "dental",
@@ -32,11 +30,9 @@ export const scenarios = {
     },
     incumbents: [
       { slug: "cedar-hill", name: "Cedar Hill Family Dentistry", baselineFile: "incumbent_blunn.md" },
-      { slug: "cameron-road", name: "Cameron Road Family Dentistry", baselineFile: "incumbent_mm.md" },
-      { slug: "parmer-lane", name: "Parmer Lane Family Dentistry", baselineFile: "incumbent_nw.md" },
-      { slug: "westlake-family", name: "Westlake Family Dental", baselineFile: "incumbent_broberg.md" }
+      { slug: "parmer-lane", name: "Parmer Lane Family Dentistry", baselineFile: "incumbent_nw.md" }
     ],
-    notes: "Local-service scenario. Underdog only has weekday hours and a smaller team. Incumbents have wider hours, more reviews, broader insurance language. Test of local-fit AEO."
+    notes: "Local-service scenario. Test of local-fit AEO against two established Austin practices."
   },
   "aeo-tool": {
     id: "aeo-tool",
@@ -50,10 +46,9 @@ export const scenarios = {
     },
     incumbents: [
       { slug: "lumen-aeo", name: "Lumen AEO", baselineFile: "incumbent_profound.md" },
-      { slug: "vantage-ai", name: "Vantage AI", baselineFile: "incumbent_hall.md" },
-      { slug: "beacon-search", name: "Beacon Search", baselineFile: "incumbent_brightedge.md" }
+      { slug: "vantage-ai", name: "Vantage AI", baselineFile: "incumbent_hall.md" }
     ],
-    notes: "Meta-scenario — an AEO tool competing with established AEO/SEO platforms. Underdog has the cleanest feature breakdown but the weakest social proof. Test of category framing."
+    notes: "Meta-scenario — an AEO tool competing with two established AEO/SEO platforms."
   }
 };
 

@@ -1,0 +1,122 @@
+# Parmer Lane Family Dentistry
+
+> Baseline page for the "dental" arena scenario. Kind: incumbent.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+.
+
+512-363-5222
+
+		
+BOOK NOW
+
+
+HOME
+ 
+ABOUT
+ 
+SERVICES
+ 
+SMILE GALLERY
+ 
+SPECIAL OFFERS
+ 
+REVIEWS
+ 
+NEW PATIENTS
+ 
+CONTACT
+ 
+We care for you
+like you are
+Family!
+
+
+Accepting new patients
+and also we accept
+most insurance plans.
+
+
+Comforting quality
+dental care for your
+Family!
+
+
+We care for you
+like you are
+Family!
+
+
+Accepting new patients
+and also we accept
+most insurance plans.
+
+
+Comforting quality
+dental care for your
+Family!
+
+
+We care for you
+like you are
+Family!
+
+
+Your Family Deserves the Best Dental Care
+Meet Dr. Rajashree Prasad
+
+Dr. Raji Prasad treats her patients comprehensively, helping them establish a good state of oral health.
+Learn More
+
+ 
+Special Offers
+
+We offer dental examinations and x-rays, learn more about dental check-ups and achieve your perfect smile.
+See Our Specials
+
+ 
+Teeth Whitening
+
+Teeth whitening performed in our dental office is guaranteed to whiten your teeth by at least a few shades.
+Teeth Whitening
+
+Austin' Top Dental Care Provider
+General Dentistry
+
+We gladly offer dentistry services and oral hygiene assistance for the young ones and adults.
+General Services
+
+ 
+Cosmetic Dentistry
+
+Cosmetic dentistry gives you that smile that when you look in the mirror, you are completely happy with what you see. Cosmetic Services
+
+ 
+Invisalign
+
+Based on your budget and needs, our dentist will be able to guide you in the right direction.
+Invisalign Services
+
+
+
+
+Reviews
+
+
+Office Tour
+
+
+
+LEARN MORE
+Welcome to Parmer Lane Family Dentistry
+
+At Northwest Aus
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.

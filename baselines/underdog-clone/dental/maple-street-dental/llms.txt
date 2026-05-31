@@ -1,0 +1,48 @@
+# Maple Street Dental
+
+> Baseline page for the "dental" arena scenario. Kind: underdog.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+Skip to Main Content
+4000 Menchaca Rd, Austin, TX 78704
+(512) 991-3219
+PROMOTIONS
+IN-HOUSE PLAN
+REQUEST APPOINTMENT
+Home
+About
+Dental Services
+New Patients
+Insurance & Financing
+Reviews
+Contact
+DENTIST – AUSTIN, TX
+Handcrafted Smiles
+With Care.
+
+Whether you are looking for the “best-ever” check-up and cleaning or are in need of same-day emergency dentistry, we are only a phone call away. Dr. Burton and her amazing team have advanced training in rebuilding smiles with dental implants, and she is proud to be the top-rated dentist for families across South Austin.
+
+— Molly Burton, DMD
+WELCOME
+TO Maple Street Dental
+In our busy world, it can sometimes be hard to find a great dentist in Austin. We’re ready to exceed your expectations.
+
+When I decided to start my own practice, I chose to prioritize personal connections over patient counts. I chose to carefully select team members who share this vision. And, I chose to invest in the latest technology that makes beautiful, healthy smiles possible. Maple Street Dental in Austin is the realization of that dream, and I am excited to meet you in person and to show you it is possible to relax and enjoy visiting the dentist while receiving exceptional clinical dental care.
+
+GET TO KNOW OUR PRACTICE
+-— MOLLY BURTON, DMD
+Molly Burton, DMD
+AUSTIN’S TOP-RATED DENTIST
+World-Class Credentials
+& Qualifications
+
+For Dr. Burton, dentistry offers a unique opportunity to change lives through the careful blending of art and scien
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.

@@ -1,0 +1,66 @@
+# Cedar Hill Family Dentistry
+
+> Baseline page for the "dental" arena scenario. Kind: incumbent.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+HOME
+ABOUT US
+SERVICES
+PATIENT INFO
+SUCCESS STORY
+SMILE GALLERY
+CONTACT US
+REQUEST AN APPOINTMENT
+
+Cedar Hill Family Dentistry
+
+GIVES YOU A REASON TO SMILE
+
+CALL US TODAY (512) 788-9282
+WELCOME TO
+Cedar Hill Family Dentistry! CREATING HEALTHY, CONFIDENT SMILES ONE AT A TIME
+
+Cedar Hill Family Dentistry in Austin, Texas, provides top-notch dental care in a calm, welcoming environment. Our commitment to excellence ensures we prioritize patient care, satisfaction, and comfort across all services. Steered by our experienced dentist, Dr. Kunjumary “Mary” Kolathu, our family-friendly office is designed to ensure patients of all ages feel relaxed and confident about their oral health. Schedule an appointment today, and discover why we are second to none.
+
+READ MORE ABOUT US
+MEET DOCTOR
+KUNJUMARY
+“MARY” KOLATHU
+
+Dr. Kunjumary “Mary” Kolathu has proudly called Austin home since 2012. She provides gentle, personalized dental care for the whole family with a special focus on restorative, cosmetic, and geriatric dentistry. Known for her warm approach, Dr. Mary is passionate about helping patients achieve healthy, confident smiles.
+
+MEET THE DOCTOR
+
+AMERICAN
+DENTAL ASSOCIATION
+
+INVISALIGN
+
+TEXAS DENTAL
+ASSOCIATION
+
+ACADEMY OF
+GENERAL DENTISTRY
+
+CAPITAL AREA
+DENTAL SOCIETY
+
+INVISALIGN
+COSMETIC DENTISTRY
+FAMILY DENTISTRY
+IMPLANTS
+ZOOM WHITENING
+DENTAL CROWNS
+PREVENTIVE CARE
+NO INSURANCE! WE GOT YOU COVERED!
+
+At Cedar Hill Family Dentistry Group, we understand that not everyone has dental insuranc
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.

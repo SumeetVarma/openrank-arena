@@ -1,0 +1,103 @@
+# Lumen AEO
+
+> Baseline page for the "aeo-tool" arena scenario. Kind: incumbent.
+> Source content cloned and brand-spoofed. The page renders standalone HTML
+> with structured data, real images and alt text, and meta tags.
+
+## Excerpt
+
+Platform
+Resources
+Solutions
+Enterprise
+Pricing
+Careers
+Log in
+Get a Demo
+The Lumen AEO Index
+Understand where you stand in AI Search in your industry
+Marketing agents to win in
+ChatGPT
+
+Reach millions of consumers who are using AI to discover new products and brands
+
+Get a Demo
+Get Started
+
+AEO-Optimized FAQ Generator
+
+Publish
+Running...
+
+Start
+
+Inputs
+
+1
+Succeeded
+
+Web Page Scrape
+
+Output
+
+Article Content
+Running
+
+Determine Core Search Query
+
+Output
+
+User Search Query
+
+Perplexity FAQ Research
+
+Output
+
+Perplexity FAQs
+
+Used by the best marketers in the world
+
+Over 100 million people search with AI every day. Brands that aren't recommended get left behind.
+
+Lumen AEO ensures yours isn't one of them.
+
+Scale your presence, not your workload
+
+Lumen AEO is the full stack marketing platform for the marketer of the future. Understand, analyze, build, and measure with the Lumen AEO platform.
+
+Prompt Volumes
+
+See what millions of people ask AI, and align strategy with demand.
+
+Learn more
+Answer Engine Insights
+
+See how AI represents your brand in every conversation.
+
+Learn more
+Agents
+
+Autonomous workers for every function of your marketing team.
+
+Learn more
+Agent Analytics
+
+Track how your site is interpreted and crawled by ChatGPT, Gemini, Claude, Perplexity, and more.
+
+Learn more
+Read case study
+"Before Lumen AEO, AI Search was a black box. Now it's a competitive advantage."
+
+George Bonaci, VP of Growth & Demand
+
+Agents for every marketing channel
+
+AEO & SEO
+
+Increase AI Search visibili
+
+## How to evaluate
+
+Use only the page content as ground truth. Do not invent prices, reviews,
+awards, integrations, or certifications. Recommend the brand only when the
+buyer's stated need genuinely fits the claims actually on this page.
