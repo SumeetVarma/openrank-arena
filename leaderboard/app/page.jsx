@@ -245,8 +245,9 @@ export default async function Page() {
           <div className="heroSplitLeft">
             <p className="heroFinalEyebrow">An AEO benchmark</p>
             <h1 className="heroFinalHead">
-              Beat the page<br />
-              ranked <span className="acc">#10</span>.
+              Optimize the hell<br />
+              out of a page ranked<br />
+              <span className="acc">#10</span> in AI.
             </h1>
             <p className="heroFinalLede">
               ChatGPT and Claude only cite a few pages when they answer buyer questions.
